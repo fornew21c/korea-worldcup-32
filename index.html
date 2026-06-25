@@ -186,6 +186,18 @@
   }
   .when{font-family:var(--mono);font-size:11px;color:var(--slate);font-variant-numeric:tabular-nums;white-space:nowrap}
   .when b{color:#9fb0c8;font-weight:700;font-size:9px;letter-spacing:.04em}
+  .when.done{color:var(--red);font-weight:700}
+
+  /* 결과 확정(잠금) 카드 */
+  .card.locked{cursor:default}
+  .card.fail{border-color:rgba(224,48,58,.6);box-shadow:0 0 0 1px rgba(224,48,58,.28), 0 18px 40px -28px rgba(224,48,58,.6)}
+  .card.fail::before{content:"";position:absolute;inset:0;background:radial-gradient(80% 60% at 50% 0%,rgba(224,48,58,.12),transparent 70%);pointer-events:none}
+  .card.fail .group{color:var(--red);border-color:rgba(224,48,58,.5)}
+  .stamp.fail{color:var(--red);opacity:1;transform:none}
+  .result{font-size:13px;font-weight:700;line-height:1.45;border-radius:10px;padding:9px 12px;margin-bottom:10px}
+  .result.fail{color:#ffd7da;background:rgba(224,48,58,.16);border:1px solid rgba(224,48,58,.5)}
+  .result.ok{color:#cdebd9;background:rgba(35,193,107,.14);border:1px solid rgba(35,193,107,.5)}
+  .opts.locked{opacity:.55;pointer-events:none;filter:grayscale(.3)}
   .switch{
     width:46px;height:26px;border-radius:99px;background:#1a2237;border:1px solid var(--line);
     position:relative;flex:none;transition:background .25s, border-color .25s;
@@ -349,7 +361,7 @@ const SCENARIOS = [
   {g:"D조", excl:true, fx:[[["🇵🇾","파라과이"],["🇦🇺","호주"]]], opts:[
     '<span class="hl">호주</span>가 파라과이를 꺾을 경우',
     '<span class="hl">파라과이</span>가 호주를 2골 차 이상으로 꺾을 경우']},
-  {g:"E조", fx:[[["🇪🇨","에콰도르"],["🇩🇪","독일"]],[["🇨🇼","퀴라소"],["🇨🇮","코트디부아르"]]], opts:[
+  {g:"E조", final:{ok:false, banner:'경기 종료 · 🇪🇨 에콰도르 승 (vs 🇩🇪 독일) → 조건 불충족'}, fx:[[["🇪🇨","에콰도르"],["🇩🇪","독일"]],[["🇨🇼","퀴라소"],["🇨🇮","코트디부아르"]]], opts:[
     '에콰도르가 독일을 <span class="hl">꺾지 못하고</span>, 퀴라소도 코트디부아르를 <span class="hl">꺾지 못할</span> 경우<span class="sub">(단, 퀴라소가 승리한다면 2골 차 이상이어야 함)</span>']},
   {g:"F조", fx:[[["🇯🇵","일본"],["🇸🇪","스웨덴"]]], opts:[
     '<span class="hl">일본</span>이 스웨덴을 2골 차로 꺾을 경우']},
@@ -390,27 +402,35 @@ const fixtureHTML = (a,b)=>`
       <span class="team"><span class="flag">${b[0]}</span><span class="team-name">${b[1]}</span></span>
     </div>`;
 const cardMet = i => state[i].some(Boolean);
+const LOCKED = SCENARIOS.map(s=>!!s.final);
 SCENARIOS.forEach((s,i)=>{
   const card = document.createElement('div');
-  card.className = 'card';
-  card.setAttribute('aria-label', s.g + ' 시나리오');
+  const fin = s.final;
+  card.className = 'card' + (fin ? (fin.ok ? ' locked done' : ' locked fail') : '');
+  card.setAttribute('aria-label', s.g + ' 시나리오' + (fin ? (fin.ok?' (충족 확정)':' (불충족 확정)') : ''));
   const fxHTML = s.fx.map(f=>fixtureHTML(f[0],f[1])).join('');
   const role = s.excl ? 'radio' : 'checkbox';
   const optsHTML = s.opts.map((o,j)=>`
-      <div class="opt${s.excl?' excl':''}" role="${role}" aria-checked="false" tabindex="0">
+      <div class="opt${s.excl?' excl':''}" role="${role}" aria-checked="false" ${fin?'':'tabindex="0"'}>
         <span class="box" aria-hidden="true"></span>
         <span class="opt-text">${o}</span>
       </div>`).join('');
+  const stamp = fin ? (fin.ok?'<div class="stamp">✓ 충족</div>':'<div class="stamp fail">✕ 불충족</div>')
+                    : '<div class="stamp">✓ 충족</div>';
+  const whenHTML = fin ? '<span class="when done">● 경기 종료</span>'
+                       : `<span class="when">🗓️ ${WHEN[s.g]} <b>KST</b></span>`;
   card.innerHTML = `
-    <div class="stamp">✓ 충족</div>
+    ${stamp}
     <div class="card-head">
       <span class="group">${s.g}</span>
-      <span class="when">🗓️ ${WHEN[s.g]} <b>KST</b></span>
+      ${whenHTML}
     </div>
     ${fxHTML}
-    ${s.excl ? '<div class="pickone">같은 경기 결과 — 1개만 선택</div>' : ''}
-    <div class="opts"${s.excl?' role="radiogroup"':''}>${optsHTML}</div>
-    ${SHOW_BAD ? '<div class="opt bad" role="checkbox" aria-checked="false" tabindex="0"><span class="box" aria-hidden="true"></span><span class="opt-text">불리 — 라이벌이 최종전 잘 풀려 <b>한국 위로</b></span></div>' : ''}`;
+    ${fin ? `<div class="result ${fin.ok?'ok':'fail'}">${fin.banner}</div>` : ''}
+    ${s.excl && !fin ? '<div class="pickone">같은 경기 결과 — 1개만 선택</div>' : ''}
+    <div class="opts${fin?' locked':''}"${s.excl?' role="radiogroup"':''}>${optsHTML}</div>
+    ${SHOW_BAD && !fin ? '<div class="opt bad" role="checkbox" aria-checked="false" tabindex="0"><span class="box" aria-hidden="true"></span><span class="opt-text">불리 — 라이벌이 최종전 잘 풀려 <b>한국 위로</b></span></div>' : ''}`;
+  if(fin){ grid.appendChild(card); return; }   // 결과 확정 카드는 잠금(수정 불가)
   const els = [...card.querySelectorAll('.opts .opt')];
   const badEl = card.querySelector('.opt.bad');
   const paint = ()=>{
@@ -544,6 +564,7 @@ function update(force){
 
 function syncVisuals(){
   [...grid.children].forEach((card,i)=>{
+    if(LOCKED[i]) return;        // 결과 확정 카드는 건드리지 않음
     [...card.querySelectorAll('.opts .opt')].forEach((el,j)=>{
       el.classList.toggle('on',state[i][j]);
       el.setAttribute('aria-checked',state[i][j]);
@@ -560,6 +581,7 @@ document.getElementById('resetBtn').addEventListener('click',()=>{
 });
 document.getElementById('randomBtn').addEventListener('click',()=>{
   SCENARIOS.forEach((s,i)=>{
+    if(LOCKED[i]) return;             // 결과 확정 조는 고정
     const a = state[i]; a.fill(false); badState[i]=false;
     const r = Math.random();
     if(r<(SHOW_BAD?0.45:0.55)){       // 유리
