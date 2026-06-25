@@ -220,7 +220,7 @@
 <script>
 const SCENARIOS = [
   {g:"D조", a:["🇵🇾","파라과이"], b:["🇦🇺","오스트레일리아"], cond:'<span class="hl">호주 승리</span>(파라과이 승점 3 묶임) 또는 <span class="hl">파라과이 2골차 이상 대승</span>(상위팀 3위로 밀려 골득실 하락)'},
-  {g:"E조", a:["🇪🇨","에콰도르"], b:["🇩🇪","독일"], cond:'에콰도르·퀴라소 <span class="hl">모두 승리 X</span> — 승점 3 넘지 못하게 (독일 1위 확정)'},
+  {g:"E조", a:["🇪🇨","에콰도르"], b:["🇩🇪","독일"], a2:["🇨🇼","퀴라소"], b2:["🇨🇮","코트디부아르"], cond:'에콰도르·퀴라소 <span class="hl">모두 승리 X</span> — 승점 3 넘지 못하게 (독일 1위 확정)'},
   {g:"F조", a:["🇯🇵","일본"], b:["🇸🇪","스웨덴"], cond:'스웨덴이 일본에 <span class="hl">2골차 이상 패배</span> — 골득실 한국(−1) 밑으로'},
   {g:"G조", a:["🇮🇷","이란"], b:["🇪🇬","이집트"], cond:'이란·벨기에 <span class="hl">모두 승리 X</span> — 승점 3 이하 유지'},
   {g:"H조", a:["🇺🇾","우루과이"], b:["🇨🇻","카보베르데"], cond:'우루과이·카보베르데 맞대결 <span class="hl">무승부</span> 또는 승자가 한국 골득실 못 넘게'},
@@ -233,6 +233,12 @@ const NEED = 3;
 const state = SCENARIOS.map(()=>false);
 
 const grid = document.getElementById('grid');
+const fixtureHTML = (a,b)=>`
+    <div class="fixture">
+      <span class="team"><span class="flag">${a[0]}</span><span class="team-name">${a[1]}</span></span>
+      <span class="vs">VS</span>
+      <span class="team"><span class="flag">${b[0]}</span><span class="team-name">${b[1]}</span></span>
+    </div>`;
 SCENARIOS.forEach((s,i)=>{
   const card = document.createElement('div');
   card.className = 'card';
@@ -246,11 +252,8 @@ SCENARIOS.forEach((s,i)=>{
       <span class="group">${s.g}</span>
       <span class="switch" aria-hidden="true"></span>
     </div>
-    <div class="fixture">
-      <span class="team"><span class="flag">${s.a[0]}</span><span class="team-name">${s.a[1]}</span></span>
-      <span class="vs">VS</span>
-      <span class="team"><span class="flag">${s.b[0]}</span><span class="team-name">${s.b[1]}</span></span>
-    </div>
+    ${fixtureHTML(s.a,s.b)}
+    ${s.a2 ? fixtureHTML(s.a2,s.b2) : ''}
     <div class="cond">${s.cond}</div>`;
   const toggle = ()=>{ state[i]=!state[i]; card.classList.toggle('met',state[i]); card.setAttribute('aria-checked',state[i]); update(true,i); };
   card.addEventListener('click',toggle);
