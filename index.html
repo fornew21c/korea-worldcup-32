@@ -218,6 +218,13 @@
 
   footer{margin-top:30px;color:var(--slate);font-size:12px;line-height:1.7;text-align:center}
   footer .src{color:#5b6479}
+  .src-link{
+    display:inline-block;margin:10px 0 6px;
+    color:var(--white);font-weight:700;font-size:13px;text-decoration:none;
+    border:1px solid var(--line);background:#0e1626;padding:8px 16px;border-radius:10px;transition:.18s;
+  }
+  .src-link:hover{border-color:#3a4760;background:#152034}
+  .src-link:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 
   canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
 
@@ -288,6 +295,7 @@
 
   <footer>
     한국은 현재 승점 3·골득실 −1. 아직 <b>D~L 9개 조의 3차전(최종전)이 안 치러진</b> 상태라, 그 결과에 따라 각 조 3위 순위가 갈립니다. 한국에 유리한 결과가 많을수록 32강(와일드카드) 가능성이 올라갑니다. 카드를 눌러 결과를 켜고 끄며 시뮬레이션해 보세요.<br>
+    <a class="src-link" href="https://m.sports.naver.com/fifaworldcup2026/record?seasonCode=3F9X" target="_blank" rel="noopener">📊 현재 순위표 보기 (네이버) →</a><br>
     <span class="src">* 공유 인포그래픽 기반 · 실제 대진/순위 규정과 다를 수 있는 참고용 시나리오</span>
   </footer>
 </div>
