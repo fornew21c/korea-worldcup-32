@@ -211,7 +211,7 @@
   .card.danger .switch{background:rgba(224,48,58,.25);border-color:var(--red)}
   .card.danger .switch::after{transform:translateX(20px);background:var(--red)}
   .stamp{
-    position:absolute;top:14px;right:60px;font-weight:800;font-size:12px;letter-spacing:.1em;
+    position:absolute;top:14px;right:16px;font-weight:800;font-size:12px;letter-spacing:.1em;
     color:var(--green);opacity:0;transform:translateY(-4px);transition:.25s;
   }
   .card.met .stamp{opacity:1;transform:translateY(0)}
@@ -347,7 +347,6 @@ SCENARIOS.forEach((s,i)=>{
     <div class="stamp">✓ 충족</div>
     <div class="card-head">
       <span class="group">${s.g}</span>
-      <span class="switch" aria-hidden="true"></span>
     </div>
     ${fxHTML}
     ${s.excl ? '<div class="pickone">같은 경기 결과 — 1개만 선택</div>' : ''}
