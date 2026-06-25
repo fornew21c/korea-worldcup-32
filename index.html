@@ -377,22 +377,41 @@ const FIXED = [
   {name:'보스니아 헤르체고비나', flag:'🇧🇦', rec:[4,-1,5]},
   {name:'스코틀랜드', flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', rec:[1,-3,1]},
 ];
+// 미충족(threat)=한국 위로 가는 팀, 충족 시 outs[선택한 옵션]=실제 3위로 떨어지는 팀
 const PENDING = [
-  {name:'파라과이',       flag:'🇵🇾', gi:0, threat:[4,-1,3], fav:[3,-3,2]},
-  {name:'에콰도르',       flag:'🇪🇨', gi:1, threat:[4,-1,1], fav:[2,-1,0]},
-  {name:'스웨덴',         flag:'🇸🇪', gi:2, threat:[3, 0,6], fav:[3,-2,6]},
-  {name:'벨기에',         flag:'🇧🇪', gi:3, threat:[5, 0,3], fav:[2,-1,2]},
-  {name:'카보베르데',     flag:'🇨🇻', gi:4, threat:[3, 0,2], fav:[2,-1,2]},
-  {name:'세네갈',         flag:'🇸🇳', gi:5, threat:[3,-1,5], fav:[0,-3,3]},
-  {name:'알제리',         flag:'🇩🇿', gi:6, threat:[4,-1,2], fav:[3,-2,2]},
-  {name:'콩고민주공화국', flag:'🇨🇩', gi:7, threat:[4, 0,2], fav:[1,-1,1]},
-  {name:'크로아티아',     flag:'🇭🇷', gi:8, threat:[3,-1,3], fav:[3,-2,3]},
+  {gi:0, threat:{n:'파라과이',f:'🇵🇾',rec:[4,-1,3]}, outs:[
+    {n:'파라과이',f:'🇵🇾',rec:[3,-3,2]},   // 호주 승 → 파라과이 3위
+    {n:'호주',    f:'🇦🇺',rec:[3,-2,2]}]}, // 파라과이 2골차 승 → 호주 3위
+  {gi:1, threat:{n:'코트디부아르',f:'🇨🇮',rec:[3,0,2]}, outs:[
+    {n:'에콰도르',f:'🇪🇨',rec:[2,-1,0]}]},  // 에콰도르·퀴라소 모두 승리X → 3위 ≤2점
+  {gi:2, threat:{n:'스웨덴',f:'🇸🇪',rec:[3,0,6]}, outs:[
+    {n:'스웨덴',f:'🇸🇪',rec:[3,-2,6]}]},    // 일본 2골차 승 → 스웨덴 골득실 추락
+  {gi:3, threat:{n:'이란',f:'🇮🇷',rec:[3,0,3]}, outs:[
+    {n:'이란',f:'🇮🇷',rec:[2,-1,2]}]},      // 이집트 승 → 이란 2점
+  {gi:4, threat:{n:'우루과이',f:'🇺🇾',rec:[3,0,2]}, outs:[
+    {n:'우루과이',f:'🇺🇾',rec:[2,-1,2]}]},  // 스페인 승 + 카보-사우디 무승부X
+  {gi:5, threat:{n:'세네갈',f:'🇸🇳',rec:[3,-1,5]}, outs:[
+    {n:'세네갈',f:'🇸🇳',rec:[1,-3,3]},      // 무승부
+    {n:'세네갈',f:'🇸🇳',rec:[3,-2,4]},      // 세네갈 1골차 승
+    {n:'이라크',f:'🇮🇶',rec:[3,-3,2]}]},    // 이라크 1~4골차 승 → 이라크 3위
+  {gi:6, threat:{n:'알제리',f:'🇩🇿',rec:[4,-1,2]}, outs:[
+    {n:'알제리',  f:'🇩🇿',rec:[3,-2,2]},   // 오스트리아 승 → 알제리 3위
+    {n:'오스트리아',f:'🇦🇹',rec:[3,-2,2]}]},// 알제리 2골차 승 → 오스트리아 3위
+  {gi:7, threat:{n:'콩고민주공화국',f:'🇨🇩',rec:[4,0,2]}, outs:[
+    {n:'콩고민주공화국',f:'🇨🇩',rec:[2,-1,1]},   // DR콩고 못 이김
+    {n:'우즈베키스탄',  f:'🇺🇿',rec:[3,-2,5]}]}, // 우즈벡 5골차+ 승 → 우즈벡 3위
+  {gi:8, threat:{n:'크로아티아',f:'🇭🇷',rec:[4,-1,3]}, outs:[
+    {n:'크로아티아',f:'🇭🇷',rec:[3,-2,3]}]}, // 가나 승 → 크로아티아 골득실 추락
 ];
+function outcomeOf(t){
+  const j = state[t.gi].findIndex(Boolean);   // 선택한 옵션(없으면 -1)
+  return j>=0 ? t.outs[j] : t.threat;
+}
 function renderRanks(){
   const rows = [
     ...FIXED.map(t=>({name:t.name,flag:t.flag,rec:t.rec})),
     {name:KOREA.name,flag:KOREA.flag,rec:KOREA.rec,korea:true},
-    ...PENDING.map(t=>({name:t.name,flag:t.flag,rec: cardMet(t.gi)?t.fav:t.threat})),
+    ...PENDING.map(t=>{ const o=outcomeOf(t); return {name:o.n,flag:o.f,rec:o.rec}; }),
   ];
   rows.sort((a,b)=> b.rec[0]-a.rec[0] || b.rec[1]-a.rec[1] || b.rec[2]-a.rec[2] || a.name.localeCompare(b.name,'ko'));
   const krRank = rows.findIndex(r=>r.korea)+1;
