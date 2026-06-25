@@ -205,6 +205,11 @@
   .card.locked{cursor:default}
   .card.fail{border-color:rgba(224,48,58,.6);box-shadow:0 0 0 1px rgba(224,48,58,.28), 0 18px 40px -28px rgba(224,48,58,.6)}
   .card.fail::before{content:"";position:absolute;inset:0;background:radial-gradient(80% 60% at 50% 0%,rgba(224,48,58,.12),transparent 70%);pointer-events:none}
+  .card.fail::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:3;
+    background:linear-gradient(to top right,
+      transparent calc(50% - 2.5px), rgba(224,48,58,.55) calc(50% - 2.5px),
+      rgba(224,48,58,.7) 50%, rgba(224,48,58,.55) calc(50% + 2.5px),
+      transparent calc(50% + 2.5px));}
   .card.fail .group{color:var(--red);border-color:rgba(224,48,58,.5)}
   .stamp.fail{color:var(--red);opacity:1;transform:none}
   .result{font-size:13px;font-weight:700;line-height:1.45;border-radius:10px;padding:9px 12px;margin-bottom:10px}
