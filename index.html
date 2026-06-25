@@ -200,6 +200,16 @@
   .opt.excl .box{border-radius:50%}
   .opt.excl.on .box::after{content:"";width:8px;height:8px;border-radius:50%;background:#06210f;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:0}
   .pickone{font-size:11.5px;color:var(--slate);margin:2px 0 8px;letter-spacing:.01em}
+  .opt.bad{margin-top:8px;border-style:dashed}
+  .opt.bad:hover{border-color:rgba(224,48,58,.5)}
+  .opt.bad.on{background:rgba(224,48,58,.12);border-color:rgba(224,48,58,.6);border-style:solid}
+  .opt.bad.on .box{background:var(--red);border-color:var(--red)}
+  .opt.bad.on .box::after{content:"✕";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff}
+  .opt.bad .opt-text b{color:var(--red)}
+  .card.danger{border-color:rgba(224,48,58,.5);box-shadow:0 0 0 1px rgba(224,48,58,.22), 0 18px 40px -28px rgba(224,48,58,.6)}
+  .card.danger::before{content:"";position:absolute;inset:0;background:radial-gradient(80% 60% at 50% 0%,rgba(224,48,58,.10),transparent 70%);pointer-events:none}
+  .card.danger .switch{background:rgba(224,48,58,.25);border-color:var(--red)}
+  .card.danger .switch::after{transform:translateX(20px);background:var(--red)}
   .stamp{
     position:absolute;top:14px;right:60px;font-weight:800;font-size:12px;letter-spacing:.1em;
     color:var(--green);opacity:0;transform:translateY(-4px);transition:.25s;
@@ -309,7 +319,8 @@ const SCENARIOS = [
     '<span class="hl">가나</span>가 크로아티아를 꺾을 경우']},
 ];
 const NEED = 3;
-const state = SCENARIOS.map(s=>s.opts.map(()=>false));
+const state = SCENARIOS.map(s=>s.opts.map(()=>false));   // 유리 옵션 선택
+const badState = SCENARIOS.map(()=>false);               // 불리(라이벌↑) 선택
 
 const grid = document.getElementById('grid');
 const fixtureHTML = (a,b)=>`
@@ -338,24 +349,38 @@ SCENARIOS.forEach((s,i)=>{
     </div>
     ${fxHTML}
     ${s.excl ? '<div class="pickone">같은 경기 결과 — 1개만 선택</div>' : ''}
-    <div class="opts"${s.excl?' role="radiogroup"':''}>${optsHTML}</div>`;
-  const els = [...card.querySelectorAll('.opt')];
+    <div class="opts"${s.excl?' role="radiogroup"':''}>${optsHTML}</div>
+    <div class="opt bad" role="checkbox" aria-checked="false" tabindex="0">
+      <span class="box" aria-hidden="true"></span>
+      <span class="opt-text">불리 — 라이벌이 최종전 잘 풀려 <b>한국 위로</b></span>
+    </div>`;
+  const els = [...card.querySelectorAll('.opts .opt')];
+  const badEl = card.querySelector('.opt.bad');
+  const paint = ()=>{
+    els.forEach((o,j)=>{ o.classList.toggle('on',state[i][j]); o.setAttribute('aria-checked',state[i][j]); });
+    badEl.classList.toggle('on',badState[i]); badEl.setAttribute('aria-checked',badState[i]);
+    card.classList.toggle('met',cardMet(i));
+    card.classList.toggle('danger',badState[i]);
+  };
   els.forEach((el,j)=>{
     const toggle = ()=>{
       const turningOn = !state[i][j];
-      if(s.excl && turningOn){          // 같은 경기 결과는 동시 발생 불가 → 1개만
-        state[i] = state[i].map(()=>false);
-        els.forEach(o=>{ o.classList.remove('on'); o.setAttribute('aria-checked','false'); });
+      if(turningOn){
+        badState[i]=false;               // 유리 선택 시 불리 해제
+        if(s.excl) state[i]=state[i].map(()=>false);  // 같은 경기 결과는 1개만
       }
-      state[i][j] = turningOn;
-      el.classList.toggle('on',state[i][j]);
-      el.setAttribute('aria-checked',state[i][j]);
-      card.classList.toggle('met',cardMet(i));
-      update(true,i);
+      state[i][j]=turningOn; paint(); update();
     };
     el.addEventListener('click',toggle);
     el.addEventListener('keydown',e=>{ if(e.key===' '||e.key==='Enter'){e.preventDefault();toggle();} });
   });
+  const badToggle = ()=>{
+    const turningOn = !badState[i];
+    if(turningOn) state[i]=state[i].map(()=>false);   // 불리 선택 시 유리 모두 해제
+    badState[i]=turningOn; paint(); update();
+  };
+  badEl.addEventListener('click',badToggle);
+  badEl.addEventListener('keydown',e=>{ if(e.key===' '||e.key==='Enter'){e.preventDefault();badToggle();} });
   grid.appendChild(card);
 });
 
@@ -378,34 +403,35 @@ const FIXED = [
   {name:'보스니아 헤르체고비나', flag:'🇧🇦', rec:[4,-1,5]},
   {name:'스코틀랜드', flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', rec:[2,0,2]},
 ];
-// base = 현재(2차전 종료) 실제 3위 기록, outs[옵션] = 그 조 최종전 유리한 결과 반영
+// base=현재 실제 3위, outs[옵션]=유리한 결과(라이벌↓), bad=불리한 결과(라이벌이 한국 위로↑)
 const PENDING = [
-  {gi:0, base:{n:'파라과이',f:'🇵🇾',rec:[3,-2,2]}, outs:[
+  {gi:0, base:{n:'파라과이',f:'🇵🇾',rec:[3,-2,2]}, bad:{n:'파라과이',f:'🇵🇾',rec:[4,-2,2]}, outs:[
     {n:'파라과이',f:'🇵🇾',rec:[3,-3,2]},   // 호주 승 → 파라과이 3위
     {n:'호주',    f:'🇦🇺',rec:[3,-2,2]}]}, // 파라과이 2골차 승 → 호주 3위
-  {gi:1, base:{n:'에콰도르',f:'🇪🇨',rec:[1,-1,0]}, outs:[
+  {gi:1, base:{n:'에콰도르',f:'🇪🇨',rec:[1,-1,0]}, bad:{n:'코트디부아르',f:'🇨🇮',rec:[3,0,2]}, outs:[
     {n:'에콰도르',f:'🇪🇨',rec:[1,-1,0]}]},  // 이미 한국 아래(유지)
-  {gi:2, base:{n:'스웨덴',f:'🇸🇪',rec:[3,0,6]}, outs:[
+  {gi:2, base:{n:'스웨덴',f:'🇸🇪',rec:[3,0,6]}, bad:{n:'스웨덴',f:'🇸🇪',rec:[4,1,8]}, outs:[
     {n:'스웨덴',f:'🇸🇪',rec:[3,-2,6]}]},    // 일본 2골차 승 → 스웨덴 골득실 추락
-  {gi:3, base:{n:'벨기에',f:'🇧🇪',rec:[2,0,1]}, outs:[
+  {gi:3, base:{n:'벨기에',f:'🇧🇪',rec:[2,0,1]}, bad:{n:'이란',f:'🇮🇷',rec:[3,0,3]}, outs:[
     {n:'이란',f:'🇮🇷',rec:[2,-1,2]}]},      // 이집트 승 → 이란 3위(2점)
-  {gi:4, base:{n:'카보베르데',f:'🇨🇻',rec:[2,0,1]}, outs:[
+  {gi:4, base:{n:'카보베르데',f:'🇨🇻',rec:[2,0,1]}, bad:{n:'우루과이',f:'🇺🇾',rec:[3,0,3]}, outs:[
     {n:'우루과이',f:'🇺🇾',rec:[2,-1,2]}]},  // 스페인 승 + 카보-사우디 무승부X → 우루과이 3위
-  {gi:5, base:{n:'세네갈',f:'🇸🇳',rec:[0,-3,3]}, outs:[
+  {gi:5, base:{n:'세네갈',f:'🇸🇳',rec:[0,-3,3]}, bad:{n:'세네갈',f:'🇸🇳',rec:[3,-1,5]}, outs:[
     {n:'세네갈',f:'🇸🇳',rec:[1,-3,3]},      // 무승부
     {n:'세네갈',f:'🇸🇳',rec:[3,-2,4]},      // 세네갈 1골차 승
     {n:'이라크',f:'🇮🇶',rec:[3,-3,2]}]},    // 이라크 1~4골차 승 → 이라크 3위
-  {gi:6, base:{n:'알제리',f:'🇩🇿',rec:[3,-2,2]}, outs:[
+  {gi:6, base:{n:'알제리',f:'🇩🇿',rec:[3,-2,2]}, bad:{n:'알제리',f:'🇩🇿',rec:[4,-2,2]}, outs:[
     {n:'알제리',  f:'🇩🇿',rec:[3,-2,2]},   // 오스트리아 승 → 알제리 3위
     {n:'오스트리아',f:'🇦🇹',rec:[3,-2,2]}]},// 알제리 2골차 승 → 오스트리아 3위
-  {gi:7, base:{n:'콩고민주공화국',f:'🇨🇩',rec:[1,-1,1]}, outs:[
+  {gi:7, base:{n:'콩고민주공화국',f:'🇨🇩',rec:[1,-1,1]}, bad:{n:'콩고민주공화국',f:'🇨🇩',rec:[4,0,2]}, outs:[
     {n:'콩고민주공화국',f:'🇨🇩',rec:[2,-1,1]},   // DR콩고 못 이김
     {n:'우즈베키스탄',  f:'🇺🇿',rec:[3,-2,5]}]}, // 우즈벡 5골차+ 승 → 우즈벡 3위
-  {gi:8, base:{n:'크로아티아',f:'🇭🇷',rec:[3,-1,3]}, outs:[
+  {gi:8, base:{n:'크로아티아',f:'🇭🇷',rec:[3,-1,3]}, bad:{n:'크로아티아',f:'🇭🇷',rec:[4,-1,3]}, outs:[
     {n:'크로아티아',f:'🇭🇷',rec:[3,-2,3]}]}, // 가나 승 → 크로아티아 골득실 추락
 ];
 function outcomeOf(t){
-  const j = state[t.gi].findIndex(Boolean);   // 선택한 옵션(없으면 현재값)
+  if(badState[t.gi]) return t.bad;            // 불리 선택 시 라이벌이 한국 위로
+  const j = state[t.gi].findIndex(Boolean);   // 유리 옵션(없으면 현재값)
   return j>=0 ? t.outs[j] : t.base;
 }
 function renderRanks(){
@@ -456,26 +482,30 @@ function update(){
 
 function syncVisuals(){
   [...grid.children].forEach((card,i)=>{
-    [...card.querySelectorAll('.opt')].forEach((el,j)=>{
+    [...card.querySelectorAll('.opts .opt')].forEach((el,j)=>{
       el.classList.toggle('on',state[i][j]);
       el.setAttribute('aria-checked',state[i][j]);
     });
+    const badEl=card.querySelector('.opt.bad');
+    badEl.classList.toggle('on',badState[i]); badEl.setAttribute('aria-checked',badState[i]);
     card.classList.toggle('met',cardMet(i));
+    card.classList.toggle('danger',badState[i]);
   });
 }
 document.getElementById('resetBtn').addEventListener('click',()=>{
-  state.forEach(a=>a.fill(false));
+  state.forEach(a=>a.fill(false)); badState.fill(false);
   syncVisuals(); firstRun=true; update();
 });
 document.getElementById('randomBtn').addEventListener('click',()=>{
   SCENARIOS.forEach((s,i)=>{
-    const a = state[i];
-    if(s.excl){                       // 1개만(또는 0개) 켜기
-      a.fill(false);
-      if(Math.random()<0.6) a[Math.floor(Math.random()*a.length)] = true;
-    }else{
-      for(let j=0;j<a.length;j++) a[j]=Math.random()<0.4;
-    }
+    const a = state[i]; a.fill(false); badState[i]=false;
+    const r = Math.random();
+    if(r<0.45){                       // 유리
+      if(s.excl) a[Math.floor(Math.random()*a.length)] = true;
+      else for(let j=0;j<a.length;j++) a[j]=Math.random()<0.5;
+    }else if(r<0.75){                 // 불리
+      badState[i]=true;
+    }                                 // 그 외 = 현재
   });
   syncVisuals(); firstRun=true; update();
 });
