@@ -162,6 +162,8 @@
     color:var(--slate);background:#0a1020;border:1px solid var(--line);
     padding:3px 9px;border-radius:7px;
   }
+  .when{font-family:var(--mono);font-size:11px;color:var(--slate);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .when b{color:#9fb0c8;font-weight:700;font-size:9px;letter-spacing:.04em}
   .switch{
     width:46px;height:26px;border-radius:99px;background:#1a2237;border:1px solid var(--line);
     position:relative;flex:none;transition:background .25s, border-color .25s;
@@ -309,7 +311,7 @@
   <footer>
     한국은 현재 승점 3·골득실 −1. 아직 <b>D~L 9개 조의 3차전(최종전)이 안 치러진</b> 상태라, 그 결과에 따라 각 조 3위 순위가 갈립니다. 한국에 유리한 결과가 많을수록 32강(와일드카드) 가능성이 올라갑니다. 카드를 눌러 결과를 켜고 끄며 시뮬레이션해 보세요.<br>
     <a class="src-link" href="https://m.sports.naver.com/fifaworldcup2026/record?seasonCode=3F9X" target="_blank" rel="noopener">📊 현재 순위표 보기 (네이버) →</a><br>
-    <span class="src">* 공유 인포그래픽 기반 · 실제 대진/순위 규정과 다를 수 있는 참고용 시나리오</span>
+    <span class="src">* 공유 인포그래픽 기반 · 실제 대진/순위 규정과 다를 수 있는 참고용 시나리오 · 경기 시간은 한국시간(KST)</span>
   </footer>
 </div>
 
@@ -344,6 +346,12 @@ const state = SCENARIOS.map(s=>s.opts.map(()=>false));   // 유리 옵션 선택
 const badState = SCENARIOS.map(()=>false);               // 불리(라이벌↑) 선택
 const SHOW_RANKS = false;   // 예상 순위표 표시 (일단 숨김)
 const SHOW_BAD   = false;   // 각 조 '불리' 토글 표시 (일단 숨김)
+// 각 조 3차전(최종전) 킥오프 — 한국시간(KST) 기준
+const WHEN = {
+  'D조':'6/26(금) 11:00', 'E조':'6/26(금) 05:00', 'F조':'6/26(금) 08:00',
+  'G조':'6/27(토) 12:00', 'H조':'6/27(토) 09:00', 'I조':'6/27(토) 04:00',
+  'J조':'6/28(일) 11:00', 'K조':'6/28(일) 08:30', 'L조':'6/28(일) 06:00',
+};
 
 const grid = document.getElementById('grid');
 const fixtureHTML = (a,b)=>`
@@ -368,6 +376,7 @@ SCENARIOS.forEach((s,i)=>{
     <div class="stamp">✓ 충족</div>
     <div class="card-head">
       <span class="group">${s.g}</span>
+      <span class="when">🗓️ ${WHEN[s.g]} <b>KST</b></span>
     </div>
     ${fxHTML}
     ${s.excl ? '<div class="pickone">같은 경기 결과 — 1개만 선택</div>' : ''}
