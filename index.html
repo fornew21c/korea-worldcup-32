@@ -316,18 +316,18 @@
           <span class="stat">승점 <b>3</b></span>
           <span class="stat">골득실 <b>−1</b></span>
           <span class="stat">다득점 <b>2</b></span>
-          <span class="stat note">각 조 3위 12팀 중 <b>상위 8위</b> 와일드카드 진출 · 남은 D~L 9개 조 최종전 미정</span>
+          <span class="stat note">각 조 3위 12팀 중 <b>상위 8위</b> 와일드카드 진출 · E조 종료, 남은 8개 조 최종전 미정</span>
         </div>
       </div>
       <div class="verdict" id="verdict">
         <div class="verdict-tag" id="verdictTag">대기 중</div>
-        <div class="verdict-sub" id="verdictSub">9개 시나리오 중 3개 이상 충족 시 진출</div>
+        <div class="verdict-sub" id="verdictSub">남은 8개 시나리오 중 3개 이상 충족 시 진출</div>
       </div>
     </div>
 
     <div class="gauge">
       <div class="gauge-head">
-        <div class="count">유리한 결과 <b id="metCount">0</b> / 9 반영</div>
+        <div class="count">유리한 결과 <b id="metCount">0</b> / <span id="liveTot">9</span> 반영</div>
         <div class="need" id="needText">유리한 결과 <span style="color:var(--white);font-weight:700">0</span>개 반영</div>
       </div>
       <div class="track">
@@ -363,7 +363,7 @@
   <div class="grid" id="grid"></div>
 
   <footer>
-    한국은 현재 승점 3·골득실 −1. 아직 <b>D~L 9개 조의 3차전(최종전)이 안 치러진</b> 상태라, 그 결과에 따라 각 조 3위 순위가 갈립니다. 한국에 유리한 결과가 많을수록 32강(와일드카드) 가능성이 올라갑니다. 카드를 눌러 결과를 켜고 끄며 시뮬레이션해 보세요.<br>
+    한국은 현재 승점 3·골득실 −1. E조는 종료됐고 <b>나머지 8개 조의 3차전(최종전)이 남아</b> 있어, 그 결과에 따라 각 조 3위 순위가 갈립니다. 한국에 유리한 결과가 많을수록 32강(와일드카드) 가능성이 올라갑니다. 카드를 눌러 결과를 켜고 끄며 시뮬레이션해 보세요.<br>
     <a class="src-link" href="https://m.sports.naver.com/fifaworldcup2026/record?seasonCode=3F9X" target="_blank" rel="noopener">📊 현재 순위표 보기 (네이버) →</a><br>
     <span class="src">* 공유 인포그래픽 기반 · 실제 대진/순위 규정과 다를 수 있는 참고용 시나리오 · 경기 시간은 한국시간(KST)</span>
   </footer>
@@ -416,6 +416,8 @@ const fixtureHTML = (a,b)=>`
     </div>`;
 const cardMet = i => state[i].some(Boolean);
 const LOCKED = SCENARIOS.map(s=>!!s.final);
+const LIVE = SCENARIOS.filter(s=>!(s.final && !s.final.ok)).length;  // 불충족 확정 제외(분모)
+const metCountOf = ()=> SCENARIOS.filter((s,i)=> s.final ? s.final.ok : cardMet(i)).length;
 SCENARIOS.forEach((s,i)=>{
   const card = document.createElement('div');
   const fin = s.final;
@@ -475,9 +477,15 @@ SCENARIOS.forEach((s,i)=>{
   grid.appendChild(card);
 });
 
-// ticks
+// ticks + 진출선 위치(분모 = 남은 라이브 조건 수)
 const ticksEl = document.getElementById('ticks');
-for(let i=0;i<9;i++){ const t=document.createElement('div'); t.className='tick'; ticksEl.appendChild(t); }
+for(let i=0;i<LIVE;i++){ const t=document.createElement('div'); t.className='tick'; ticksEl.appendChild(t); }
+{
+  const pct = (NEED/LIVE*100)+'%';
+  const th=document.querySelector('.thresh'), thl=document.querySelector('.thresh-label');
+  if(th) th.style.left=pct; if(thl) thl.style.left=pct;
+  const lt=document.getElementById('liveTot'); if(lt) lt.textContent=LIVE;
+}
 
 const board=document.getElementById('board'), tag=document.getElementById('verdictTag'),
       sub=document.getElementById('verdictSub'), metCount=document.getElementById('metCount'),
@@ -552,9 +560,9 @@ function renderRanks(){
 
 function update(force){
   if(SHOW_RANKS) renderRanks();
-  const met = state.filter(a=>a.some(Boolean)).length;
+  const met = metCountOf();
   metCount.textContent = met;
-  fill.style.width = (met/9*100)+'%';
+  fill.style.width = (met/LIVE*100)+'%';
   const isIn = met>=NEED;
 
   if(isIn){
@@ -566,7 +574,7 @@ function update(force){
   }else{
     board.classList.remove('state-in'); board.classList.add('state-out');
     tag.textContent = met===0 ? '대기 중' : (force ? '😢 진출 실패' : '아직 부족');
-    sub.textContent='9개 시나리오 중 3개 이상 충족 시 진출';
+    sub.textContent=`남은 ${LIVE}개 시나리오 중 3개 이상 충족 시 진출`;
     needText.innerHTML=`진출까지 <span style="color:var(--white);font-weight:700">${NEED-met}</span>개`;
     board.classList.toggle('state-fail', !!(force && met>0));
     if(force && met>0) fail();    // 시뮬레이션 결과 3개 미만 → 탈락 애니메이션
