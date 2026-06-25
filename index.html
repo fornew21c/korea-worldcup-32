@@ -275,7 +275,7 @@
     </div>
   </section>
 
-  <section class="ranks" id="ranks">
+  <section class="ranks" id="ranks" hidden>
     <div class="ranks-head">
       <div class="ranks-title">각 조 3위 예상 순위 <span class="ranks-cut">· 상위 8위 와일드카드 진출</span></div>
       <div class="ranks-sub" id="koreaRank">—</div>
@@ -321,6 +321,8 @@ const SCENARIOS = [
 const NEED = 3;
 const state = SCENARIOS.map(s=>s.opts.map(()=>false));   // 유리 옵션 선택
 const badState = SCENARIOS.map(()=>false);               // 불리(라이벌↑) 선택
+const SHOW_RANKS = false;   // 예상 순위표 표시 (일단 숨김)
+const SHOW_BAD   = false;   // 각 조 '불리' 토글 표시 (일단 숨김)
 
 const grid = document.getElementById('grid');
 const fixtureHTML = (a,b)=>`
@@ -350,15 +352,12 @@ SCENARIOS.forEach((s,i)=>{
     ${fxHTML}
     ${s.excl ? '<div class="pickone">같은 경기 결과 — 1개만 선택</div>' : ''}
     <div class="opts"${s.excl?' role="radiogroup"':''}>${optsHTML}</div>
-    <div class="opt bad" role="checkbox" aria-checked="false" tabindex="0">
-      <span class="box" aria-hidden="true"></span>
-      <span class="opt-text">불리 — 라이벌이 최종전 잘 풀려 <b>한국 위로</b></span>
-    </div>`;
+    ${SHOW_BAD ? '<div class="opt bad" role="checkbox" aria-checked="false" tabindex="0"><span class="box" aria-hidden="true"></span><span class="opt-text">불리 — 라이벌이 최종전 잘 풀려 <b>한국 위로</b></span></div>' : ''}`;
   const els = [...card.querySelectorAll('.opts .opt')];
   const badEl = card.querySelector('.opt.bad');
   const paint = ()=>{
     els.forEach((o,j)=>{ o.classList.toggle('on',state[i][j]); o.setAttribute('aria-checked',state[i][j]); });
-    badEl.classList.toggle('on',badState[i]); badEl.setAttribute('aria-checked',badState[i]);
+    if(badEl){ badEl.classList.toggle('on',badState[i]); badEl.setAttribute('aria-checked',badState[i]); }
     card.classList.toggle('met',cardMet(i));
     card.classList.toggle('danger',badState[i]);
   };
@@ -374,13 +373,15 @@ SCENARIOS.forEach((s,i)=>{
     el.addEventListener('click',toggle);
     el.addEventListener('keydown',e=>{ if(e.key===' '||e.key==='Enter'){e.preventDefault();toggle();} });
   });
-  const badToggle = ()=>{
-    const turningOn = !badState[i];
-    if(turningOn) state[i]=state[i].map(()=>false);   // 불리 선택 시 유리 모두 해제
-    badState[i]=turningOn; paint(); update();
-  };
-  badEl.addEventListener('click',badToggle);
-  badEl.addEventListener('keydown',e=>{ if(e.key===' '||e.key==='Enter'){e.preventDefault();badToggle();} });
+  if(badEl){
+    const badToggle = ()=>{
+      const turningOn = !badState[i];
+      if(turningOn) state[i]=state[i].map(()=>false);   // 불리 선택 시 유리 모두 해제
+      badState[i]=turningOn; paint(); update();
+    };
+    badEl.addEventListener('click',badToggle);
+    badEl.addEventListener('keydown',e=>{ if(e.key===' '||e.key==='Enter'){e.preventDefault();badToggle();} });
+  }
   grid.appendChild(card);
 });
 
@@ -392,7 +393,7 @@ const board=document.getElementById('board'), tag=document.getElementById('verdi
       sub=document.getElementById('verdictSub'), metCount=document.getElementById('metCount'),
       needText=document.getElementById('needText'), fill=document.getElementById('fill'),
       ranksTable=document.getElementById('ranksTable'), koreaRankEl=document.getElementById('koreaRank');
-let prevRank=99, firstRun=true;
+let wasIn=false;
 
 /* ---- 각 조 3위(와일드카드) 실시간 순위 ----
    rec = [승점, 골득실, 다득점].  마감된 A·B·C조 3위는 고정,
@@ -460,24 +461,25 @@ function renderRanks(){
 }
 
 function update(){
-  const {krRank, inTop8} = renderRanks();
+  if(SHOW_RANKS) renderRanks();
   const met = state.filter(a=>a.some(Boolean)).length;
   metCount.textContent = met;
   fill.style.width = (met/9*100)+'%';
+  const isIn = met>=NEED;
 
-  if(inTop8){
+  if(isIn){
     board.classList.add('state-in'); board.classList.remove('state-out');
-    tag.textContent = `🇰🇷 ${krRank}위 · 진출권`;
-    sub.textContent = `각 조 3위 12팀 중 ${krRank}위 — 상위 8위 진출`;
-    needText.innerHTML = `유리한 결과 <span style="color:var(--green);font-weight:700">${met}</span>개 반영`;
-    if(!firstRun && krRank < prevRank) burst();
+    tag.textContent='🎉 진출 안정권!';
+    sub.textContent=`유리한 결과 ${met}개 — 권장 ${NEED}개 이상 충족`;
+    needText.innerHTML=`권장선 통과 <span style="color:var(--green);font-weight:700">+${met-NEED}</span>`;
+    if(!wasIn) burst();
   }else{
     board.classList.remove('state-in'); board.classList.add('state-out');
-    tag.textContent = `🇰🇷 ${krRank}위 · 탈락권`;
-    sub.textContent = `각 조 3위 12팀 중 ${krRank}위 — 상위 8위만 진출`;
-    needText.innerHTML = `유리한 결과 <span style="color:var(--white);font-weight:700">${met}</span>개 반영`;
+    tag.textContent = met===0 ? '대기 중' : '아직 부족';
+    sub.textContent='유리한 결과 3개 이상이면 진출 안정권';
+    needText.innerHTML=`안정권까지 <span style="color:var(--white);font-weight:700">${NEED-met}</span>개`;
   }
-  prevRank = krRank; firstRun = false;
+  wasIn=isIn;
 }
 
 function syncVisuals(){
@@ -494,7 +496,7 @@ function syncVisuals(){
 }
 document.getElementById('resetBtn').addEventListener('click',()=>{
   state.forEach(a=>a.fill(false)); badState.fill(false);
-  syncVisuals(); firstRun=true; update();
+  syncVisuals(); wasIn=false; update();
 });
 document.getElementById('randomBtn').addEventListener('click',()=>{
   SCENARIOS.forEach((s,i)=>{
@@ -507,7 +509,7 @@ document.getElementById('randomBtn').addEventListener('click',()=>{
       badState[i]=true;
     }                                 // 그 외 = 현재
   });
-  syncVisuals(); firstRun=true; update();
+  syncVisuals(); wasIn=false; update();
 });
 
 /* ---- confetti ---- */
