@@ -187,6 +187,19 @@
   .when{font-family:var(--mono);font-size:11px;color:var(--slate);font-variant-numeric:tabular-nums;white-space:nowrap}
   .when b{color:#9fb0c8;font-weight:700;font-size:9px;letter-spacing:.04em}
   .when.done{color:var(--red);font-weight:700}
+  .head-left{display:flex;align-items:center;gap:8px;min-width:0}
+  .badge-met{
+    display:none;font-weight:800;font-size:12px;letter-spacing:.02em;
+    color:#06210f;background:var(--green);padding:4px 11px;border-radius:999px;white-space:nowrap;
+    box-shadow:0 0 0 3px rgba(35,193,107,.22), 0 8px 16px -6px rgba(35,193,107,.85);
+  }
+  .card.met .badge-met,.card.done .badge-met{display:inline-block;animation:badgePop .28s cubic-bezier(.2,.8,.2,1)}
+  @keyframes badgePop{0%{transform:scale(.5);opacity:0}60%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+  .badge-fail{
+    display:inline-block;font-weight:800;font-size:12px;letter-spacing:.02em;
+    color:#fff;background:var(--red);padding:4px 11px;border-radius:999px;white-space:nowrap;
+    box-shadow:0 0 0 3px rgba(224,48,58,.22), 0 8px 16px -6px rgba(224,48,58,.85);
+  }
 
   /* 결과 확정(잠금) 카드 */
   .card.locked{cursor:default}
@@ -415,14 +428,13 @@ SCENARIOS.forEach((s,i)=>{
         <span class="box" aria-hidden="true"></span>
         <span class="opt-text">${o}</span>
       </div>`).join('');
-  const stamp = fin ? (fin.ok?'<div class="stamp">✓ 충족</div>':'<div class="stamp fail">✕ 불충족</div>')
-                    : '<div class="stamp">✓ 충족</div>';
+  const badge = (fin && !fin.ok) ? '<span class="badge-fail">✕ 불충족</span>'
+                                 : '<span class="badge-met">✓ 충족</span>';
   const whenHTML = fin ? '<span class="when done">● 경기 종료</span>'
-                       : `<span class="when">🗓️ ${WHEN[s.g]} <b>KST</b></span>`;
+                       : `<span class="when">🗓️ ${WHEN[s.g]}</span>`;
   card.innerHTML = `
-    ${stamp}
     <div class="card-head">
-      <span class="group">${s.g}</span>
+      <span class="head-left"><span class="group">${s.g}</span>${badge}</span>
       ${whenHTML}
     </div>
     ${fxHTML}
