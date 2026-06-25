@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="대한민국 월드컵 32강 진출 경우의 수 인터랙티브 시뮬레이터">
+<title>대한민국 32강 경우의 수 시뮬레이터</title>
+<style>
+  :root{
+    --ground:#0A0E1A;
+    --panel:#121829;
+    --panel-2:#0E1422;
+    --line:#222B40;
+    --red:#E0303A;
+    --blue:#1E63D6;
+    --green:#23C16B;
+    --slate:#7E879B;
+    --white:#F4F7FB;
+    --mono:"SF Mono",ui-monospace,"DejaVu Sans Mono",Menlo,Consolas,monospace;
+    --kr:"Pretendard","Apple SD Gothic Neo","Noto Sans KR",system-ui,-apple-system,"Segoe UI",sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:var(--kr);
+    color:var(--white);
+    background:
+      radial-gradient(120% 80% at 50% -10%, #16203a 0%, rgba(22,32,58,0) 55%),
+      var(--ground);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  .stadium-glow{
+    position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(60% 40% at 15% 110%, rgba(224,48,58,.10), transparent 60%),
+      radial-gradient(60% 40% at 85% 110%, rgba(30,99,214,.10), transparent 60%);
+  }
+  .wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:28px 20px 80px}
+
+  /* ---------- Scoreboard ---------- */
+  .board{
+    position:sticky;top:12px;z-index:20;
+    background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    border:1px solid var(--line);
+    border-radius:18px;
+    box-shadow:0 24px 60px -30px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.04);
+    padding:20px 22px;
+    margin-bottom:26px;
+  }
+  .eyebrow{
+    font-size:12px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--slate);font-weight:700;display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 10px var(--red);animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .board-top{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap}
+  h1{
+    font-size:clamp(26px,4.4vw,40px);font-weight:800;letter-spacing:-.03em;
+    margin:8px 0 0;line-height:1.05;text-wrap:balance;
+  }
+  h1 .flag{font-weight:400}
+  .verdict{
+    text-align:right;min-width:200px;
+  }
+  .verdict-tag{
+    display:inline-flex;align-items:center;gap:10px;
+    font-weight:800;letter-spacing:-.02em;
+    font-size:clamp(28px,5vw,44px);line-height:1;
+    transition:color .35s ease;
+  }
+  .verdict-sub{color:var(--slate);font-size:13px;margin-top:6px;font-variant-numeric:tabular-nums}
+  .state-out .verdict-tag{color:var(--slate)}
+  .state-in .verdict-tag{color:var(--green)}
+
+  /* gauge */
+  .gauge{margin-top:18px}
+  .gauge-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+  .count{font-family:var(--mono);font-weight:700;font-size:15px;font-variant-numeric:tabular-nums}
+  .count b{color:var(--green);font-size:22px}
+  .need{color:var(--slate);font-size:13px}
+  .track{height:12px;border-radius:99px;background:#0a1020;border:1px solid var(--line);overflow:hidden;position:relative}
+  .fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--blue),var(--green));transition:width .45s cubic-bezier(.2,.8,.2,1)}
+  .ticks{position:absolute;inset:0;display:flex;pointer-events:none}
+  .tick{flex:1;border-right:1px solid rgba(255,255,255,.05)}
+  .tick:last-child{border-right:none}
+  .thresh{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--red);left:33.33%;box-shadow:0 0 8px var(--red)}
+  .thresh-label{position:absolute;top:-22px;left:33.33%;transform:translateX(-50%);font-size:10px;color:var(--red);font-weight:700;letter-spacing:.08em;white-space:nowrap}
+
+  .controls{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+  .btn{
+    font-family:var(--kr);font-weight:700;font-size:13px;
+    border:1px solid var(--line);background:#0e1626;color:var(--white);
+    padding:9px 16px;border-radius:10px;cursor:pointer;transition:.18s;
+  }
+  .btn:hover{border-color:#3a4760;background:#152034}
+  .btn.primary{background:var(--red);border-color:var(--red)}
+  .btn.primary:hover{background:#f0454f}
+  .btn:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+  /* ---------- Cards ---------- */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+  .card{
+    background:linear-gradient(180deg,#10172a,#0d1322);
+    border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px;
+    cursor:pointer;transition:border-color .2s, box-shadow .2s, transform .12s;
+    position:relative;overflow:hidden;
+  }
+  .card:hover{border-color:#33415e}
+  .card:active{transform:scale(.992)}
+  .card.met{border-color:rgba(35,193,107,.55);box-shadow:0 0 0 1px rgba(35,193,107,.25), 0 18px 40px -28px rgba(35,193,107,.6)}
+  .card.met::before{content:"";position:absolute;inset:0;background:radial-gradient(80% 60% at 50% 0%,rgba(35,193,107,.10),transparent 70%);pointer-events:none}
+  .card:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+  .card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .group{
+    font-family:var(--mono);font-weight:700;font-size:12px;letter-spacing:.05em;
+    color:var(--slate);background:#0a1020;border:1px solid var(--line);
+    padding:3px 9px;border-radius:7px;
+  }
+  .switch{
+    width:46px;height:26px;border-radius:99px;background:#1a2237;border:1px solid var(--line);
+    position:relative;flex:none;transition:background .25s, border-color .25s;
+  }
+  .switch::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--slate);transition:transform .25s, background .25s}
+  .card.met .switch{background:rgba(35,193,107,.25);border-color:var(--green)}
+  .card.met .switch::after{transform:translateX(20px);background:var(--green)}
+  .fixture{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .team{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;letter-spacing:-.01em;min-width:0}
+  .team .flag{font-size:22px;line-height:1}
+  .vs{font-family:var(--mono);font-size:11px;color:var(--slate);font-weight:700;padding:0 2px}
+  .team-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cond{font-size:13.5px;line-height:1.5;color:#c3cbdb}
+  .cond .hl{color:var(--red);font-weight:700}
+  .card.met .cond .hl{color:var(--green)}
+  .stamp{
+    position:absolute;top:14px;right:60px;font-weight:800;font-size:12px;letter-spacing:.1em;
+    color:var(--green);opacity:0;transform:translateY(-4px);transition:.25s;
+  }
+  .card.met .stamp{opacity:1;transform:translateY(0)}
+
+  footer{margin-top:30px;color:var(--slate);font-size:12px;line-height:1.7;text-align:center}
+  footer .src{color:#5b6479}
+
+  canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
+
+  @media (max-width:560px){
+    .board{position:static}
+    .verdict{text-align:left;min-width:0}
+    .board-top{align-items:flex-start}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+
+<div class="stadium-glow"></div>
+<canvas id="confetti"></canvas>
+
+<div class="wrap">
+  <section class="board state-out" id="board" aria-live="polite">
+    <div class="board-top">
+      <div>
+        <div class="eyebrow"><span class="dot"></span>조별리그 3차전 · 경우의 수</div>
+        <h1><span class="flag">🇰🇷</span> 대한민국 32강 진출 시뮬레이터</h1>
+      </div>
+      <div class="verdict" id="verdict">
+        <div class="verdict-tag" id="verdictTag">대기 중</div>
+        <div class="verdict-sub" id="verdictSub">9개 시나리오 중 3개 충족 필요</div>
+      </div>
+    </div>
+
+    <div class="gauge">
+      <div class="gauge-head">
+        <div class="count"><b id="metCount">0</b> / 9 충족</div>
+        <div class="need" id="needText">3개까지 <span style="color:var(--white);font-weight:700">3</span>개 남음</div>
+      </div>
+      <div class="track">
+        <div class="ticks" id="ticks"></div>
+        <div class="fill" id="fill"></div>
+        <div class="thresh"></div>
+        <div class="thresh-label">진출선 3</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn primary" id="randomBtn" type="button">🎲 랜덤 시뮬레이션</button>
+      <button class="btn" id="resetBtn" type="button">초기화</button>
+    </div>
+  </section>
+
+  <div class="grid" id="grid"></div>
+
+  <footer>
+    각 조 3차전에서 한국에 유리한 결과를 가정한 경우의 수입니다. 카드를 눌러 결과를 켜고 끄며 시뮬레이션해 보세요.<br>
+    <span class="src">* 공유 인포그래픽 기반 · 실제 대진/순위 규정과 다를 수 있는 참고용 시나리오</span>
+  </footer>
+</div>
+
+<script>
+const SCENARIOS = [
+  {g:"D조", a:["🇦🇺","호주"], b:["🇵🇾","파라과이"], cond:'<span class="hl">호주 승리</span> 또는 파라과이 <span class="hl">2점차 이상</span> 승리'},
+  {g:"E조", a:["🇪🇨","에콰도르"], b:["🇨🇼","퀴라소"], cond:'에콰도르·퀴라소 <span class="hl">둘 다 승리 X</span> (무승부 OK)'},
+  {g:"F조", a:["🇯🇵","일본"], b:["🇸🇪","스웨덴"], cond:'일본이 스웨덴에 <span class="hl">2골차 이상</span> 승리'},
+  {g:"G조", a:["🇧🇪","벨기에"], b:["🇪🇬","이집트"], cond:'<span class="hl">벨기에 승리</span> + <span class="hl">이집트 승리</span> (둘 다)'},
+  {g:"H조", a:["🇪🇸","스페인"], b:["🇸🇦","사우디"], cond:'<span class="hl">스페인 승리</span> + <span class="hl">사우디 승리</span> (둘 다)'},
+  {g:"I조", a:["🇸🇳","세네갈"], b:["🇮🇶","이라크"], cond:'세네갈 승리 또는 <span class="hl">이라크 대승만 아니면</span> OK'},
+  {g:"J조", a:["🇦🇹","오스트리아"], b:["🇩🇿","알제리"], cond:'<span class="hl">오스트리아 승리</span>'},
+  {g:"K조", a:["🇨🇩","콩고민주공화국"], b:["🇺🇿","우즈베키스탄"], cond:'우즈벡전 <span class="hl">무승부 또는 패배</span>'},
+  {g:"L조", a:["🇬🇭","가나"], b:["🇭🇷","크로아티아"], cond:'<span class="hl">가나 승리</span>'},
+];
+const NEED = 3;
+const state = SCENARIOS.map(()=>false);
+
+const grid = document.getElementById('grid');
+SCENARIOS.forEach((s,i)=>{
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.tabIndex = 0;
+  card.setAttribute('role','switch');
+  card.setAttribute('aria-checked','false');
+  card.setAttribute('aria-label', s.g + ' ' + s.a[1] + ' 대 ' + s.b[1] + ' 시나리오');
+  card.innerHTML = `
+    <div class="stamp">✓ 충족</div>
+    <div class="card-head">
+      <span class="group">${s.g}</span>
+      <span class="switch" aria-hidden="true"></span>
+    </div>
+    <div class="fixture">
+      <span class="team"><span class="flag">${s.a[0]}</span><span class="team-name">${s.a[1]}</span></span>
+      <span class="vs">VS</span>
+      <span class="team"><span class="flag">${s.b[0]}</span><span class="team-name">${s.b[1]}</span></span>
+    </div>
+    <div class="cond">${s.cond}</div>`;
+  const toggle = ()=>{ state[i]=!state[i]; card.classList.toggle('met',state[i]); card.setAttribute('aria-checked',state[i]); update(true,i); };
+  card.addEventListener('click',toggle);
+  card.addEventListener('keydown',e=>{ if(e.key===' '||e.key==='Enter'){e.preventDefault();toggle();} });
+  grid.appendChild(card);
+});
+
+// ticks
+const ticksEl = document.getElementById('ticks');
+for(let i=0;i<9;i++){ const t=document.createElement('div'); t.className='tick'; ticksEl.appendChild(t); }
+
+const board=document.getElementById('board'), tag=document.getElementById('verdictTag'),
+      sub=document.getElementById('verdictSub'), metCount=document.getElementById('metCount'),
+      needText=document.getElementById('needText'), fill=document.getElementById('fill');
+let wasIn=false;
+
+function update(fromClick,idx){
+  const met = state.filter(Boolean).length;
+  metCount.textContent = met;
+  fill.style.width = (met/9*100)+'%';
+  const isIn = met>=NEED;
+
+  if(isIn){
+    board.classList.add('state-in'); board.classList.remove('state-out');
+    tag.textContent='🎉 32강 진출!';
+    sub.textContent=`충족 ${met}개 — 진출선 ${NEED}개 통과`;
+    needText.innerHTML=`진출 확정 <span style="color:var(--green);font-weight:700">+${met-NEED}</span> 여유`;
+    if(!wasIn) burst();
+  }else{
+    board.classList.remove('state-in'); board.classList.add('state-out');
+    tag.textContent = met===0 ? '대기 중' : '아직 부족';
+    sub.textContent='9개 시나리오 중 3개 충족 필요';
+    needText.innerHTML=`진출까지 <span style="color:var(--white);font-weight:700">${NEED-met}</span>개 남음`;
+  }
+  wasIn=isIn;
+}
+
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  state.fill(false);
+  [...grid.children].forEach(c=>{c.classList.remove('met');c.setAttribute('aria-checked','false');});
+  wasIn=false; update();
+});
+document.getElementById('randomBtn').addEventListener('click',()=>{
+  [...grid.children].forEach((c,i)=>{
+    state[i]=Math.random()<0.45;
+    c.classList.toggle('met',state[i]); c.setAttribute('aria-checked',state[i]);
+  });
+  wasIn=false; update();
+});
+
+/* ---- confetti ---- */
+const cv=document.getElementById('confetti'), ctx=cv.getContext('2d');
+let parts=[],raf=null;
+const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
+function size(){cv.width=innerWidth;cv.height=innerHeight;}
+size(); addEventListener('resize',size);
+function burst(){
+  if(reduce) return;
+  const cols=['#E0303A','#1E63D6','#23C16B','#F4F7FB','#FFC83D'];
+  for(let i=0;i<140;i++){
+    parts.push({x:innerWidth/2+(Math.random()-.5)*200,y:innerHeight*0.18,
+      vx:(Math.random()-.5)*9, vy:Math.random()*-9-3, g:0.28,
+      s:5+Math.random()*6, c:cols[i%cols.length], r:Math.random()*6, vr:(Math.random()-.5)*.4, life:1});
+  }
+  if(!raf) loop();
+}
+function loop(){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  parts.forEach(p=>{p.vy+=p.g;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;p.life-=0.008;
+    ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.globalAlpha=Math.max(0,p.life);
+    ctx.fillStyle=p.c;ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6);ctx.restore();});
+  parts=parts.filter(p=>p.life>0 && p.y<cv.height+40);
+  if(parts.length) raf=requestAnimationFrame(loop); else {raf=null;ctx.clearRect(0,0,cv.width,cv.height);}
+}
+
+update();
+</script>
+</body>
+</html>
