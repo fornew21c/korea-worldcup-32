@@ -227,6 +227,18 @@
   .src-link:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 
   canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
+  .fail-flash{
+    position:fixed;inset:0;pointer-events:none;z-index:40;opacity:0;
+    background:radial-gradient(circle at 50% 38%, rgba(224,48,58,.38), rgba(224,48,58,0) 60%);
+  }
+  .fail-flash.show{animation:failflash .6s ease}
+  @keyframes failflash{0%{opacity:0}15%{opacity:1}100%{opacity:0}}
+  @keyframes shake{
+    10%,90%{transform:translateX(-2px)} 20%,80%{transform:translateX(4px)}
+    30%,50%,70%{transform:translateX(-8px)} 40%,60%{transform:translateX(8px)}
+  }
+  .board.shake{animation:shake .5s cubic-bezier(.36,.07,.19,.97)}
+  .state-fail .verdict-tag{color:var(--red)}
 
   @media (max-width:560px){
     .board{position:static}
@@ -242,6 +254,7 @@
 
 <div class="stadium-glow"></div>
 <canvas id="confetti"></canvas>
+<div id="failFlash" class="fail-flash" aria-hidden="true"></div>
 
 <div class="wrap">
   <section class="board state-out" id="board" aria-live="polite">
@@ -467,7 +480,7 @@ function renderRanks(){
   return {krRank, inTop8};
 }
 
-function update(){
+function update(force){
   if(SHOW_RANKS) renderRanks();
   const met = state.filter(a=>a.some(Boolean)).length;
   metCount.textContent = met;
@@ -475,16 +488,18 @@ function update(){
   const isIn = met>=NEED;
 
   if(isIn){
-    board.classList.add('state-in'); board.classList.remove('state-out');
+    board.classList.add('state-in'); board.classList.remove('state-out','state-fail');
     tag.textContent='🎉 32강 진출!';
     sub.textContent=`유리한 결과 ${met}개 — 진출선 ${NEED}개 통과`;
     needText.innerHTML=`진출선 통과 <span style="color:var(--green);font-weight:700">+${met-NEED}</span>`;
-    if(!wasIn) burst();
+    if(force || !wasIn) burst();
   }else{
     board.classList.remove('state-in'); board.classList.add('state-out');
-    tag.textContent = met===0 ? '대기 중' : '아직 부족';
+    tag.textContent = met===0 ? '대기 중' : (force ? '😢 진출 실패' : '아직 부족');
     sub.textContent='9개 시나리오 중 3개 이상 충족 시 진출';
     needText.innerHTML=`진출까지 <span style="color:var(--white);font-weight:700">${NEED-met}</span>개`;
+    board.classList.toggle('state-fail', !!(force && met>0));
+    if(force && met>0) fail();    // 시뮬레이션 결과 3개 미만 → 탈락 애니메이션
   }
   wasIn=isIn;
 }
@@ -516,11 +531,12 @@ document.getElementById('randomBtn').addEventListener('click',()=>{
       badState[i]=true;
     }                                 // 그 외 = 현재
   });
-  syncVisuals(); wasIn=false; update();
+  syncVisuals(); update(true);
 });
 
-/* ---- confetti ---- */
+/* ---- confetti / fail ---- */
 const cv=document.getElementById('confetti'), ctx=cv.getContext('2d');
+const flash=document.getElementById('failFlash');
 let parts=[],raf=null;
 const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
 function size(){cv.width=innerWidth;cv.height=innerHeight;}
@@ -532,6 +548,18 @@ function burst(){
     parts.push({x:innerWidth/2+(Math.random()-.5)*200,y:innerHeight*0.18,
       vx:(Math.random()-.5)*9, vy:Math.random()*-9-3, g:0.28,
       s:5+Math.random()*6, c:cols[i%cols.length], r:Math.random()*6, vr:(Math.random()-.5)*.4, life:1});
+  }
+  if(!raf) loop();
+}
+function fail(){
+  if(reduce) return;
+  board.classList.remove('shake'); void board.offsetWidth; board.classList.add('shake');
+  flash.classList.remove('show'); void flash.offsetWidth; flash.classList.add('show');
+  const cols=['#7E879B','#5b6479','#3a4760','#E0303A'];     // 잿빛 + 레드 낙하
+  for(let i=0;i<120;i++){
+    parts.push({x:Math.random()*innerWidth, y:-20-Math.random()*120,
+      vx:(Math.random()-.5)*1.5, vy:Math.random()*3+2, g:0.12,
+      s:4+Math.random()*5, c:cols[i%cols.length], r:Math.random()*6, vr:(Math.random()-.5)*.3, life:1});
   }
   if(!raf) loop();
 }
