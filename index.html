@@ -488,7 +488,7 @@ function syncVisuals(){
       el.setAttribute('aria-checked',state[i][j]);
     });
     const badEl=card.querySelector('.opt.bad');
-    badEl.classList.toggle('on',badState[i]); badEl.setAttribute('aria-checked',badState[i]);
+    if(badEl){ badEl.classList.toggle('on',badState[i]); badEl.setAttribute('aria-checked',badState[i]); }
     card.classList.toggle('met',cardMet(i));
     card.classList.toggle('danger',badState[i]);
   });
@@ -501,10 +501,10 @@ document.getElementById('randomBtn').addEventListener('click',()=>{
   SCENARIOS.forEach((s,i)=>{
     const a = state[i]; a.fill(false); badState[i]=false;
     const r = Math.random();
-    if(r<0.45){                       // 유리
+    if(r<(SHOW_BAD?0.45:0.55)){       // 유리
       if(s.excl) a[Math.floor(Math.random()*a.length)] = true;
       else for(let j=0;j<a.length;j++) a[j]=Math.random()<0.5;
-    }else if(r<0.75){                 // 불리
+    }else if(SHOW_BAD && r<0.75){     // 불리(숨김 시 미사용)
       badState[i]=true;
     }                                 // 그 외 = 현재
   });
