@@ -61,6 +61,17 @@
     margin:8px 0 0;line-height:1.05;text-wrap:balance;
   }
   h1 .flag{font-weight:400}
+  .standing{
+    display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;
+  }
+  .standing .stat{
+    font-family:var(--mono);font-size:12px;color:var(--slate);
+    background:#0a1020;border:1px solid var(--line);
+    padding:4px 10px;border-radius:7px;font-variant-numeric:tabular-nums;
+  }
+  .standing .stat b{color:var(--white);font-weight:700}
+  .standing .stat.note{color:var(--slate);font-family:var(--kr)}
+  .standing .stat .ok{color:var(--green)}
   .verdict{
     text-align:right;min-width:200px;
   }
@@ -163,8 +174,15 @@
   <section class="board state-out" id="board" aria-live="polite">
     <div class="board-top">
       <div>
-        <div class="eyebrow"><span class="dot"></span>조별리그 3차전 · 경우의 수</div>
+        <div class="eyebrow"><span class="dot"></span>조별리그 3차전 · 와일드카드 경우의 수</div>
         <h1><span class="flag">🇰🇷</span> 대한민국 32강 진출 시뮬레이터</h1>
+        <div class="standing" id="standing">
+          <span class="stat"><b>1승 2패</b></span>
+          <span class="stat">승점 <b>3</b></span>
+          <span class="stat">골득실 <b>−1</b></span>
+          <span class="stat">다득점 <b>2</b></span>
+          <span class="stat note">각 조 3위 12팀 중 <b>상위 8위</b> 진출 · 현재 <b class="ok">안정권</b></span>
+        </div>
       </div>
       <div class="verdict" id="verdict">
         <div class="verdict-tag" id="verdictTag">대기 중</div>
@@ -194,22 +212,22 @@
   <div class="grid" id="grid"></div>
 
   <footer>
-    각 조 3차전에서 한국에 유리한 결과를 가정한 경우의 수입니다. 카드를 눌러 결과를 켜고 끄며 시뮬레이션해 보세요.<br>
+    한국은 현재 승점 3·골득실 −1로 각 조 3위 12팀 중 <b>상위 8위 안(안정권)</b>입니다. 남은 D~L조 최종전이 한국에 유리하게 흐를수록 순위가 더 안전해집니다. 카드를 눌러 결과를 켜고 끄며 시뮬레이션해 보세요.<br>
     <span class="src">* 공유 인포그래픽 기반 · 실제 대진/순위 규정과 다를 수 있는 참고용 시나리오</span>
   </footer>
 </div>
 
 <script>
 const SCENARIOS = [
-  {g:"D조", a:["🇦🇺","호주"], b:["🇵🇾","파라과이"], cond:'<span class="hl">호주 승리</span> 또는 파라과이 <span class="hl">2점차 이상</span> 승리'},
-  {g:"E조", a:["🇪🇨","에콰도르"], b:["🇨🇼","퀴라소"], cond:'에콰도르·퀴라소 <span class="hl">둘 다 승리 X</span> (무승부 OK)'},
-  {g:"F조", a:["🇯🇵","일본"], b:["🇸🇪","스웨덴"], cond:'일본이 스웨덴에 <span class="hl">2골차 이상</span> 승리'},
-  {g:"G조", a:["🇧🇪","벨기에"], b:["🇪🇬","이집트"], cond:'<span class="hl">벨기에 승리</span> + <span class="hl">이집트 승리</span> (둘 다)'},
-  {g:"H조", a:["🇪🇸","스페인"], b:["🇸🇦","사우디"], cond:'<span class="hl">스페인 승리</span> + <span class="hl">사우디 승리</span> (둘 다)'},
-  {g:"I조", a:["🇸🇳","세네갈"], b:["🇮🇶","이라크"], cond:'세네갈 승리 또는 <span class="hl">이라크 대승만 아니면</span> OK'},
-  {g:"J조", a:["🇦🇹","오스트리아"], b:["🇩🇿","알제리"], cond:'<span class="hl">오스트리아 승리</span>'},
-  {g:"K조", a:["🇨🇩","콩고민주공화국"], b:["🇺🇿","우즈베키스탄"], cond:'우즈벡전 <span class="hl">무승부 또는 패배</span>'},
-  {g:"L조", a:["🇬🇭","가나"], b:["🇭🇷","크로아티아"], cond:'<span class="hl">가나 승리</span>'},
+  {g:"D조", a:["🇵🇾","파라과이"], b:["🇹🇷","튀르키예"], cond:'파라과이·튀르키예 <span class="hl">무승부</span> 또는 하위팀 패배 — 승점 추가 X'},
+  {g:"E조", a:["🇪🇨","에콰도르"], b:["🇨🇼","퀴라소"], cond:'에콰도르·퀴라소 <span class="hl">무승부</span> — 승점 3 넘지 못하게'},
+  {g:"F조", a:["🇯🇵","일본"], b:["🇸🇪","스웨덴"], cond:'스웨덴 <span class="hl">대패</span> — 골득실 한국(−1) 밑으로'},
+  {g:"G조", a:["🇧🇪","벨기에"], b:["🇮🇷","이란"], cond:'벨기에·이란 <span class="hl">무승부</span> 또는 한 팀 <span class="hl">대패</span> — 승점 3 유지'},
+  {g:"H조", a:["🇺🇾","우루과이"], b:["🇨🇻","카보베르데"], cond:'우루과이·카보베르데·사우디 <span class="hl">승점 3 못 넘게</span> — 물고 물리거나 패배'},
+  {g:"I조", a:["🇸🇳","세네갈"], b:["🇮🇶","이라크"], cond:'세네갈 승리해도 <span class="hl">골득실 −1 못 넘게</span> 또는 이라크 승리'},
+  {g:"J조", a:["🇩🇿","알제리"], b:["🇦🇹","오스트리아"], cond:'알제리·오스트리아 중 <span class="hl">한 팀 패배</span> — 승점 추가 못 하게'},
+  {g:"K조", a:["🇨🇩","콩고민주공화국"], b:["🇺🇿","우즈베키스탄"], cond:'<span class="hl">무승부</span> 또는 우즈베키스탄 승리 — 승점 3 못 넘게'},
+  {g:"L조", a:["🇭🇷","크로아티아"], b:["🏴󠁧󠁢󠁥󠁮󠁧󠁿","잉글랜드"], cond:'크로아티아 <span class="hl">패배</span> (잉글랜드 승리) — 승점 3 유지'},
 ];
 const NEED = 3;
 const state = SCENARIOS.map(()=>false);
