@@ -144,6 +144,26 @@
   .cond{font-size:13.5px;line-height:1.5;color:#c3cbdb}
   .cond .hl{color:var(--red);font-weight:700}
   .card.met .cond .hl{color:var(--green)}
+  .opts{display:flex;flex-direction:column;gap:8px;margin-top:2px}
+  .opt{
+    display:flex;gap:10px;align-items:flex-start;
+    background:#0b1322;border:1px solid var(--line);border-radius:10px;
+    padding:10px 12px;cursor:pointer;transition:border-color .15s, background .15s;
+  }
+  .opt:hover{border-color:#33415e;background:#0e1626}
+  .opt:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+  .opt .box{
+    flex:none;width:20px;height:20px;border-radius:6px;border:1.5px solid var(--slate);
+    margin-top:1px;position:relative;transition:.15s;
+  }
+  .opt.on .box{background:var(--green);border-color:var(--green)}
+  .opt.on .box::after{content:"✓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#06210f}
+  .opt .opt-text{font-size:13.5px;line-height:1.5;color:#c3cbdb}
+  .opt.on .opt-text{color:var(--white)}
+  .opt .opt-text .hl{color:var(--red);font-weight:700}
+  .opt.on .opt-text .hl{color:var(--green)}
+  .opt-text .sub{display:block;color:var(--slate);font-size:12px;margin-top:3px}
+  .opt-text .sub .hl{color:var(--slate)}
   .stamp{
     position:absolute;top:14px;right:60px;font-weight:800;font-size:12px;letter-spacing:.1em;
     color:var(--green);opacity:0;transform:translateY(-4px);transition:.25s;
@@ -219,18 +239,32 @@
 
 <script>
 const SCENARIOS = [
-  {g:"D조", a:["🇵🇾","파라과이"], b:["🇦🇺","오스트레일리아"], cond:'<span class="hl">호주 승리</span>(파라과이 승점 3 묶임) 또는 <span class="hl">파라과이 2골차 이상 대승</span>(상위팀 3위로 밀려 골득실 하락)'},
-  {g:"E조", a:["🇪🇨","에콰도르"], b:["🇩🇪","독일"], a2:["🇨🇼","퀴라소"], b2:["🇨🇮","코트디부아르"], cond:'에콰도르·퀴라소 <span class="hl">모두 승리 X</span> — 승점 3 넘지 못하게 (독일 1위 확정)'},
-  {g:"F조", a:["🇯🇵","일본"], b:["🇸🇪","스웨덴"], cond:'스웨덴이 일본에 <span class="hl">2골차 이상 패배</span> — 골득실 한국(−1) 밑으로'},
-  {g:"G조", a:["🇮🇷","이란"], b:["🇪🇬","이집트"], cond:'이란·벨기에 <span class="hl">모두 승리 X</span> — 승점 3 이하 유지'},
-  {g:"H조", a:["🇺🇾","우루과이"], b:["🇨🇻","카보베르데"], cond:'우루과이·카보베르데 맞대결 <span class="hl">무승부</span> 또는 승자가 한국 골득실 못 넘게'},
-  {g:"I조", a:["🇸🇳","세네갈"], b:["🇮🇶","이라크"], cond:'세네갈·이라크 <span class="hl">무승부</span> 베스트 — 세네갈 승리해도 골득실·다득점 추월 X'},
-  {g:"J조", a:["🇩🇿","알제리"], b:["🇦🇹","오스트리아"], cond:'알제리·오스트리아 <span class="hl">무승부 X</span> — 한 팀 대승해 패팀 골득실 한국 밑으로'},
-  {g:"K조", a:["🇨🇩","콩고민주공화국"], b:["🇺🇿","우즈베키스탄"], cond:'<span class="hl">무승부</span> 또는 우즈베키스탄 승리 — 3위 승점 3 미만'},
-  {g:"L조", a:["🇬🇭","가나"], b:["🇭🇷","크로아티아"], cond:'<span class="hl">가나 승리</span> — 크로아티아 승점 3에 묶고 골득실 깎기'},
+  {g:"D조", fx:[[["🇵🇾","파라과이"],["🇦🇺","호주"]]], opts:[
+    '<span class="hl">호주</span>가 파라과이를 꺾을 경우',
+    '<span class="hl">파라과이</span>가 호주를 2골 차 이상으로 꺾을 경우']},
+  {g:"E조", fx:[[["🇪🇨","에콰도르"],["🇩🇪","독일"]],[["🇨🇼","퀴라소"],["🇨🇮","코트디부아르"]]], opts:[
+    '에콰도르가 독일을 <span class="hl">꺾지 못하고</span>, 퀴라소도 코트디부아르를 <span class="hl">꺾지 못할</span> 경우<span class="sub">(단, 퀴라소가 승리한다면 2골 차 이상이어야 함)</span>']},
+  {g:"F조", fx:[[["🇯🇵","일본"],["🇸🇪","스웨덴"]]], opts:[
+    '<span class="hl">일본</span>이 스웨덴을 2골 차로 꺾을 경우']},
+  {g:"G조", fx:[[["🇪🇬","이집트"],["🇮🇷","이란"]]], opts:[
+    '<span class="hl">이집트</span>가 이란을 꺾을 경우']},
+  {g:"H조", fx:[[["🇪🇸","스페인"],["🇺🇾","우루과이"]],[["🇨🇻","카보베르데"],["🇸🇦","사우디아라비아"]]], opts:[
+    '스페인이 우루과이를 <span class="hl">꺾고</span>, 카보베르데-사우디전이 <span class="hl">무승부로 끝나지 않을</span> 경우']},
+  {g:"I조", fx:[[["🇸🇳","세네갈"],["🇮🇶","이라크"]]], opts:[
+    '세네갈-이라크전 <span class="hl">무승부</span>로 끝날 경우',
+    '<span class="hl">세네갈</span>이 이라크를 1골 차로 꺾을 경우',
+    '<span class="hl">이라크</span>가 세네갈을 1~4골 차로 꺾을 경우']},
+  {g:"J조", fx:[[["🇩🇿","알제리"],["🇦🇹","오스트리아"]]], opts:[
+    '<span class="hl">오스트리아</span>가 알제리를 꺾을 경우',
+    '<span class="hl">알제리</span>가 오스트리아를 2골 차 이상으로 꺾을 경우']},
+  {g:"K조", fx:[[["🇨🇩","DR콩고"],["🇺🇿","우즈베키스탄"]]], opts:[
+    '<span class="hl">DR콩고</span>가 우즈베키스탄을 꺾지 못할 경우',
+    '<span class="hl">우즈베키스탄</span>이 DR콩고를 5골 차 이상으로 꺾을 경우']},
+  {g:"L조", fx:[[["🇬🇭","가나"],["🇭🇷","크로아티아"]]], opts:[
+    '<span class="hl">가나</span>가 크로아티아를 꺾을 경우']},
 ];
 const NEED = 3;
-const state = SCENARIOS.map(()=>false);
+const state = SCENARIOS.map(s=>s.opts.map(()=>false));
 
 const grid = document.getElementById('grid');
 const fixtureHTML = (a,b)=>`
@@ -239,25 +273,36 @@ const fixtureHTML = (a,b)=>`
       <span class="vs">VS</span>
       <span class="team"><span class="flag">${b[0]}</span><span class="team-name">${b[1]}</span></span>
     </div>`;
+const cardMet = i => state[i].some(Boolean);
 SCENARIOS.forEach((s,i)=>{
   const card = document.createElement('div');
   card.className = 'card';
-  card.tabIndex = 0;
-  card.setAttribute('role','switch');
-  card.setAttribute('aria-checked','false');
-  card.setAttribute('aria-label', s.g + ' ' + s.a[1] + ' 대 ' + s.b[1] + ' 시나리오');
+  card.setAttribute('aria-label', s.g + ' 시나리오');
+  const fxHTML = s.fx.map(f=>fixtureHTML(f[0],f[1])).join('');
+  const optsHTML = s.opts.map((o,j)=>`
+      <div class="opt" role="checkbox" aria-checked="false" tabindex="0">
+        <span class="box" aria-hidden="true"></span>
+        <span class="opt-text">${o}</span>
+      </div>`).join('');
   card.innerHTML = `
     <div class="stamp">✓ 충족</div>
     <div class="card-head">
       <span class="group">${s.g}</span>
       <span class="switch" aria-hidden="true"></span>
     </div>
-    ${fixtureHTML(s.a,s.b)}
-    ${s.a2 ? fixtureHTML(s.a2,s.b2) : ''}
-    <div class="cond">${s.cond}</div>`;
-  const toggle = ()=>{ state[i]=!state[i]; card.classList.toggle('met',state[i]); card.setAttribute('aria-checked',state[i]); update(true,i); };
-  card.addEventListener('click',toggle);
-  card.addEventListener('keydown',e=>{ if(e.key===' '||e.key==='Enter'){e.preventDefault();toggle();} });
+    ${fxHTML}
+    <div class="opts">${optsHTML}</div>`;
+  [...card.querySelectorAll('.opt')].forEach((el,j)=>{
+    const toggle = ()=>{
+      state[i][j] = !state[i][j];
+      el.classList.toggle('on',state[i][j]);
+      el.setAttribute('aria-checked',state[i][j]);
+      card.classList.toggle('met',cardMet(i));
+      update(true,i);
+    };
+    el.addEventListener('click',toggle);
+    el.addEventListener('keydown',e=>{ if(e.key===' '||e.key==='Enter'){e.preventDefault();toggle();} });
+  });
   grid.appendChild(card);
 });
 
@@ -271,7 +316,7 @@ const board=document.getElementById('board'), tag=document.getElementById('verdi
 let wasIn=false;
 
 function update(fromClick,idx){
-  const met = state.filter(Boolean).length;
+  const met = state.filter(a=>a.some(Boolean)).length;
   metCount.textContent = met;
   fill.style.width = (met/9*100)+'%';
   const isIn = met>=NEED;
@@ -291,17 +336,22 @@ function update(fromClick,idx){
   wasIn=isIn;
 }
 
+function syncVisuals(){
+  [...grid.children].forEach((card,i)=>{
+    [...card.querySelectorAll('.opt')].forEach((el,j)=>{
+      el.classList.toggle('on',state[i][j]);
+      el.setAttribute('aria-checked',state[i][j]);
+    });
+    card.classList.toggle('met',cardMet(i));
+  });
+}
 document.getElementById('resetBtn').addEventListener('click',()=>{
-  state.fill(false);
-  [...grid.children].forEach(c=>{c.classList.remove('met');c.setAttribute('aria-checked','false');});
-  wasIn=false; update();
+  state.forEach(a=>a.fill(false));
+  syncVisuals(); wasIn=false; update();
 });
 document.getElementById('randomBtn').addEventListener('click',()=>{
-  [...grid.children].forEach((c,i)=>{
-    state[i]=Math.random()<0.45;
-    c.classList.toggle('met',state[i]); c.setAttribute('aria-checked',state[i]);
-  });
-  wasIn=false; update();
+  state.forEach(a=>{ for(let j=0;j<a.length;j++) a[j]=Math.random()<0.35; });
+  syncVisuals(); wasIn=false; update();
 });
 
 /* ---- confetti ---- */
