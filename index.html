@@ -102,8 +102,9 @@
   .tally .tt{display:inline-flex;align-items:center;gap:5px}
   .tally b{font-weight:800}
   .tally .total b{color:var(--white)}
-  .tally .live b{color:var(--green)}
-  .tally .fail b{color:var(--red)}
+  .tally .live{color:#9fb0c8} .tally .live b{color:#cdd6e6}
+  .tally .done{color:var(--green)} .tally .done b{color:var(--green)}
+  .tally .fail{color:var(--red)} .tally .fail b{color:var(--red)}
 
   .controls{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
   .btn{
@@ -396,7 +397,7 @@ const SCENARIOS = [
     '<span class="hl">이집트</span>가 이란을 꺾을 경우']},
   {g:"H조", fx:[[["🇪🇸","스페인"],["🇺🇾","우루과이"]]], opts:[
     '<span class="hl">스페인</span>이 우루과이를 꺾을 경우']},
-  {g:"I조", excl:true, final:{ok:false, banner:'세네갈 4-0 이라크 승 → 승점 3·득실 +1로 한국 추월'}, fx:[[["🇸🇳","세네갈"],["🇮🇶","이라크"]]], opts:[
+  {g:"I조", excl:true, final:{ok:false, banner:'세네갈 5-0 이라크 승 → 승점 3·득실 +2로 한국 추월'}, fx:[[["🇸🇳","세네갈"],["🇮🇶","이라크"]]], opts:[
     '세네갈-이라크전 <span class="hl">무승부</span>로 끝날 경우',
     '<span class="hl">세네갈</span>이 이라크를 1골 차로 꺾을 경우',
     '<span class="hl">이라크</span>가 세네갈을 1~4골 차로 꺾을 경우']},
@@ -502,9 +503,12 @@ for(let i=0;i<LIVE;i++){ const t=document.createElement('div'); t.className='tic
   if(tallyEl){
     const total=SCENARIOS.length;
     const failed=SCENARIOS.filter(s=>s.final&&!s.final.ok).length;
+    const doneOk=SCENARIOS.filter(s=>s.final&&s.final.ok).length;
+    const inProg=total-failed-doneOk;
     tallyEl.innerHTML =
       `<span class="tt total">시작 <b>${total}</b>개 조건</span>`+
-      `<span class="tt live">🟢 진행 <b>${LIVE}</b></span>`+
+      `<span class="tt live">● 진행 <b>${inProg}</b></span>`+
+      `<span class="tt done">✓ 충족 <b>${doneOk}</b></span>`+
       `<span class="tt fail">✕ 불충족 <b>${failed}</b></span>`;
   }
 }
