@@ -322,12 +322,12 @@
           <span class="stat">승점 <b>3</b></span>
           <span class="stat">골득실 <b>−1</b></span>
           <span class="stat">다득점 <b>2</b></span>
-          <span class="stat note">각 조 3위 12팀 중 <b>상위 8위</b> 와일드카드 진출 · D·E·F조 종료, 남은 6개 조 최종전 미정</span>
+          <span class="stat note">각 조 3위 12팀 중 <b>상위 8위</b> 와일드카드 진출 · D·E·F·I조 종료, 남은 5개 조 최종전 미정</span>
         </div>
       </div>
       <div class="verdict" id="verdict">
         <div class="verdict-tag" id="verdictTag">대기 중</div>
-        <div class="verdict-sub" id="verdictSub">남은 6개 시나리오 중 3개 이상 충족 시 진출</div>
+        <div class="verdict-sub" id="verdictSub">남은 5개 시나리오 중 3개 이상 충족 시 진출</div>
       </div>
     </div>
 
@@ -369,7 +369,7 @@
   <div class="grid" id="grid"></div>
 
   <footer>
-    한국은 현재 승점 3·골득실 −1. D·E·F조는 종료됐고 <b>나머지 6개 조의 3차전(최종전)이 남아</b> 있으며, 그 결과에 따라 각 조 3위 순위가 갈립니다. 한국에 유리한 결과가 많을수록 32강(와일드카드) 가능성이 올라갑니다. 카드를 눌러 결과를 켜고 끄며 시뮬레이션해 보세요.<br>
+    한국은 현재 승점 3·골득실 −1. D·E·F·I조는 종료됐고 <b>나머지 5개 조의 3차전(최종전)이 남아</b> 있으며, 그 결과에 따라 각 조 3위 순위가 갈립니다. 한국에 유리한 결과가 많을수록 32강(와일드카드) 가능성이 올라갑니다. 카드를 눌러 결과를 켜고 끄며 시뮬레이션해 보세요.<br>
     <a class="src-link" href="https://m.sports.naver.com/fifaworldcup2026/record?seasonCode=3F9X" target="_blank" rel="noopener">📊 현재 순위표 보기 (네이버) →</a><br>
     <span class="src">* 공유 인포그래픽 기반 · 실제 대진/순위 규정과 다를 수 있는 참고용 시나리오 · 경기 시간은 한국시간(KST)</span><br>
     <span class="copyright">© 2026 Woncheol Heo. All rights reserved.</span>
@@ -389,7 +389,7 @@ const SCENARIOS = [
     '<span class="hl">이집트</span>가 이란을 꺾을 경우']},
   {g:"H조", fx:[[["🇪🇸","스페인"],["🇺🇾","우루과이"]]], opts:[
     '<span class="hl">스페인</span>이 우루과이를 꺾을 경우']},
-  {g:"I조", excl:true, fx:[[["🇸🇳","세네갈"],["🇮🇶","이라크"]]], opts:[
+  {g:"I조", excl:true, final:{ok:false, banner:'세네갈이 이라크를 2골 차 이상으로 꺾어 한국 추월'}, fx:[[["🇸🇳","세네갈"],["🇮🇶","이라크"]]], opts:[
     '세네갈-이라크전 <span class="hl">무승부</span>로 끝날 경우',
     '<span class="hl">세네갈</span>이 이라크를 1골 차로 꺾을 경우',
     '<span class="hl">이라크</span>가 세네갈을 1~4골 차로 꺾을 경우']},
