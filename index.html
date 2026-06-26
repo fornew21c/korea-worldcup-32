@@ -151,6 +151,13 @@
   .ranks-note{font-size:11px;color:#5b6479;margin-top:10px;line-height:1.5}
 
   /* ---------- Picket ---------- */
+  .cosmos{
+    text-align:center;margin:2px 0 16px;
+    font-size:clamp(15px,2.7vw,20px);font-weight:600;font-style:italic;letter-spacing:.01em;
+    color:#aeb8cc;text-shadow:0 0 20px rgba(120,140,210,.5);
+    animation:twinkle 3s ease-in-out infinite;
+  }
+  @keyframes twinkle{0%,100%{opacity:.7;text-shadow:0 0 14px rgba(120,140,210,.35)}50%{opacity:1;text-shadow:0 0 24px rgba(120,140,210,.7)}}
   .picket-wrap{display:flex;justify-content:center;margin:6px 0 30px}
   .picket-sign{
     display:flex;flex-direction:column;align-items:center;
@@ -357,6 +364,8 @@
       <button class="btn" id="resetBtn" type="button">초기화</button>
     </div>
   </section>
+
+  <div class="cosmos">🌌 온 우주가 그를 외면하고 있다…</div>
 
   <div class="picket-wrap">
     <div class="picket-sign">
