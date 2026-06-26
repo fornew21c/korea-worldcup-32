@@ -98,6 +98,12 @@
   .tick:last-child{border-right:none}
   .thresh{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--red);left:33.33%;box-shadow:0 0 8px var(--red)}
   .thresh-label{position:absolute;top:-22px;left:33.33%;transform:translateX(-50%);font-size:10px;color:var(--red);font-weight:700;letter-spacing:.08em;white-space:nowrap}
+  .tally{margin-top:12px;font-family:var(--mono);font-size:12px;color:var(--slate);font-variant-numeric:tabular-nums;display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}
+  .tally .tt{display:inline-flex;align-items:center;gap:5px}
+  .tally b{font-weight:800}
+  .tally .total b{color:var(--white)}
+  .tally .live b{color:var(--green)}
+  .tally .fail b{color:var(--red)}
 
   .controls{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
   .btn{
@@ -342,6 +348,7 @@
         <div class="thresh"></div>
         <div class="thresh-label">진출선 3</div>
       </div>
+      <div class="tally" id="tally"></div>
     </div>
 
     <div class="controls">
@@ -491,6 +498,15 @@ for(let i=0;i<LIVE;i++){ const t=document.createElement('div'); t.className='tic
   const th=document.querySelector('.thresh'), thl=document.querySelector('.thresh-label');
   if(th) th.style.left=pct; if(thl) thl.style.left=pct;
   const lt=document.getElementById('liveTot'); if(lt) lt.textContent=LIVE;
+  const tallyEl=document.getElementById('tally');
+  if(tallyEl){
+    const total=SCENARIOS.length;
+    const failed=SCENARIOS.filter(s=>s.final&&!s.final.ok).length;
+    tallyEl.innerHTML =
+      `<span class="tt total">시작 <b>${total}</b>개 조건</span>`+
+      `<span class="tt live">🟢 진행 <b>${LIVE}</b></span>`+
+      `<span class="tt fail">✕ 불충족 <b>${failed}</b></span>`;
+  }
 }
 
 const board=document.getElementById('board'), tag=document.getElementById('verdictTag'),
