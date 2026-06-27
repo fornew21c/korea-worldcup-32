@@ -204,7 +204,7 @@
   }
   .when{font-family:var(--mono);font-size:11px;color:var(--slate);font-variant-numeric:tabular-nums;white-space:nowrap}
   .when b{color:#9fb0c8;font-weight:700;font-size:9px;letter-spacing:.04em}
-  .when.done{color:var(--red);font-weight:700}
+  .when.done{color:#9fb0c8;font-weight:700}
   .head-left{display:flex;align-items:center;gap:8px;min-width:0}
   .badge-met{
     display:none;font-weight:800;font-size:12px;letter-spacing:.02em;
@@ -221,6 +221,9 @@
 
   /* 결과 확정(잠금) 카드 */
   .card.locked{cursor:default}
+  .card.done{border-color:rgba(35,193,107,.6);box-shadow:0 0 0 1px rgba(35,193,107,.28), 0 18px 40px -28px rgba(35,193,107,.6)}
+  .card.done::before{content:"";position:absolute;inset:0;background:radial-gradient(80% 60% at 50% 0%,rgba(35,193,107,.12),transparent 70%);pointer-events:none}
+  .card.done .group{color:var(--green);border-color:rgba(35,193,107,.5)}
   .card.fail{border-color:rgba(224,48,58,.6);box-shadow:0 0 0 1px rgba(224,48,58,.28), 0 18px 40px -28px rgba(224,48,58,.6)}
   .card.fail::before{content:"";position:absolute;inset:0;background:radial-gradient(80% 60% at 50% 0%,rgba(224,48,58,.12),transparent 70%);pointer-events:none}
   .card.fail::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:3;
@@ -340,12 +343,12 @@
           <span class="stat">승점 <b>3</b></span>
           <span class="stat">골득실 <b>−1</b></span>
           <span class="stat">다득점 <b>2</b></span>
-          <span class="stat note">각 조 3위 12팀 중 <b>상위 8위</b> 와일드카드 진출 · D·E·F·I조 종료, 남은 5개 조 최종전 미정</span>
+          <span class="stat note">각 조 3위 12팀 중 <b>상위 8위</b> 와일드카드 진출 · D·E·F·H·I조 종료, 남은 4개 조 최종전 미정</span>
         </div>
       </div>
       <div class="verdict" id="verdict">
         <div class="verdict-tag" id="verdictTag">대기 중</div>
-        <div class="verdict-sub" id="verdictSub">남은 5개 시나리오 중 3개 이상 충족 시 진출</div>
+        <div class="verdict-sub" id="verdictSub">유리한 결과 3개 이상이면 32강 진출</div>
       </div>
     </div>
 
@@ -370,8 +373,8 @@
   </section>
 
   <div class="cosmos">
-    <div class="cosmos-main">🌌 온 우주가 그를 외면하고 있다</div>
-    <div class="cosmos-sub">9개의 문 중 <b>4개</b>가 차례로 닫혔다.<br>그래도 남은 <b>3개</b>만 열리면 된다. 아직, 아직은.</div>
+    <div class="cosmos-main">🌌 우주가, 아주 잠깐, 그를 돌아봤다</div>
+    <div class="cosmos-sub">9개의 문 중 4개가 닫혔지만, 드디어 <b>첫 문이 열렸다</b>.<br>이제 <b>2개</b>만 더 열리면 된다. 아직, 아직은.</div>
   </div>
 
   <div class="picket-wrap">
@@ -393,7 +396,7 @@
   <div class="grid" id="grid"></div>
 
   <footer>
-    한국은 현재 승점 3·골득실 −1. D·E·F·I조는 종료됐고 <b>나머지 5개 조의 3차전(최종전)이 남아</b> 있으며, 그 결과에 따라 각 조 3위 순위가 갈립니다. 한국에 유리한 결과가 많을수록 32강(와일드카드) 가능성이 올라갑니다. 카드를 눌러 결과를 켜고 끄며 시뮬레이션해 보세요.<br>
+    한국은 현재 승점 3·골득실 −1. D·E·F·H·I조는 종료됐고 <b>나머지 4개 조의 3차전(최종전)이 남아</b> 있으며, 그 결과에 따라 각 조 3위 순위가 갈립니다. 한국에 유리한 결과가 많을수록 32강(와일드카드) 가능성이 올라갑니다. 카드를 눌러 결과를 켜고 끄며 시뮬레이션해 보세요.<br>
     <a class="src-link" href="https://m.sports.naver.com/fifaworldcup2026/record?seasonCode=3F9X" target="_blank" rel="noopener">📊 현재 순위표 보기 (네이버) →</a><br>
     <span class="src">* 공유 인포그래픽 기반 · 실제 대진/순위 규정과 다를 수 있는 참고용 시나리오 · 경기 시간은 한국시간(KST)</span><br>
     <span class="copyright">© 2026 Woncheol Heo. All rights reserved.</span>
@@ -411,7 +414,7 @@ const SCENARIOS = [
     '<span class="hl">일본</span>이 스웨덴을 2골 차 이상으로 꺾을 경우']},
   {g:"G조", fx:[[["🇪🇬","이집트"],["🇮🇷","이란"]]], opts:[
     '<span class="hl">이집트</span>가 이란을 꺾을 경우']},
-  {g:"H조", fx:[[["🇪🇸","스페인"],["🇺🇾","우루과이"]]], opts:[
+  {g:"H조", final:{ok:true, banner:'스페인 1-0 우루과이 승 → 조건 충족!'}, fx:[[["🇪🇸","스페인"],["🇺🇾","우루과이"]]], opts:[
     '<span class="hl">스페인</span>이 우루과이를 꺾을 경우']},
   {g:"I조", excl:true, final:{ok:false, banner:'세네갈 5-0 이라크 승 → 승점 3·득실 +2로 한국 추월'}, fx:[[["🇸🇳","세네갈"],["🇮🇶","이라크"]]], opts:[
     '세네갈-이라크전 <span class="hl">무승부</span>로 끝날 경우',
@@ -616,7 +619,7 @@ function update(force){
   }else{
     board.classList.remove('state-in'); board.classList.add('state-out');
     tag.textContent = met===0 ? '대기 중' : (force ? '😢 진출 실패' : '아직 부족');
-    sub.textContent=`남은 ${LIVE}개 시나리오 중 3개 이상 충족 시 진출`;
+    sub.textContent='유리한 결과 3개 이상이면 32강 진출';
     needText.innerHTML=`진출까지 <span style="color:var(--white);font-weight:700">${NEED-met}</span>개`;
     board.classList.toggle('state-fail', !!(force && met>0));
     if(force && met>0) fail();    // 시뮬레이션 결과 3개 미만 → 탈락 애니메이션
