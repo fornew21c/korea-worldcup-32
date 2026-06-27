@@ -405,10 +405,10 @@
 
 <script>
 const SCENARIOS = [
-  {g:"D조", excl:true, final:{ok:false, banner:'파라과이·호주 무승부 → 둘 다 승점 4로 한국 추월'}, fx:[[["🇵🇾","파라과이"],["🇦🇺","호주"]]], opts:[
+  {g:"D조", excl:true, final:{ok:false, banner:'파라과이·호주 무승부 → 둘 다 승점 4로 한국보다 우위'}, fx:[[["🇵🇾","파라과이"],["🇦🇺","호주"]]], opts:[
     '<span class="hl">호주</span>가 파라과이를 꺾을 경우',
     '<span class="hl">파라과이</span>가 호주를 2골 차 이상으로 꺾을 경우']},
-  {g:"E조", final:{ok:false, banner:'에콰도르가 독일을 꺾어 승점 4 → 한국 추월'}, fx:[[["🇪🇨","에콰도르"],["🇩🇪","독일"]],[["🇨🇼","퀴라소"],["🇨🇮","코트디부아르"]]], opts:[
+  {g:"E조", final:{ok:false, banner:'에콰도르가 독일을 꺾어 승점 4 → 한국보다 우위'}, fx:[[["🇪🇨","에콰도르"],["🇩🇪","독일"]],[["🇨🇼","퀴라소"],["🇨🇮","코트디부아르"]]], opts:[
     '에콰도르가 독일을 <span class="hl">꺾지 못하고</span>, 퀴라소도 코트디부아르를 <span class="hl">꺾지 못할</span> 경우<span class="sub">(단, 퀴라소가 승리한다면 2골 차 이상이어야 함)</span>']},
   {g:"F조", final:{ok:false, banner:'스웨덴이 일본과 비겨 승점 4 → 한국보다 우위'}, fx:[[["🇯🇵","일본"],["🇸🇪","스웨덴"]]], opts:[
     '<span class="hl">일본</span>이 스웨덴을 2골 차 이상으로 꺾을 경우']},
@@ -416,7 +416,7 @@ const SCENARIOS = [
     '<span class="hl">이집트</span>가 이란을 꺾을 경우']},
   {g:"H조", final:{ok:true, banner:'스페인 1-0 우루과이 승 → 조건 충족!'}, fx:[[["🇪🇸","스페인"],["🇺🇾","우루과이"]]], opts:[
     '<span class="hl">스페인</span>이 우루과이를 꺾을 경우']},
-  {g:"I조", excl:true, final:{ok:false, banner:'세네갈 5-0 이라크 승 → 승점 3·득실 +2로 한국 추월'}, fx:[[["🇸🇳","세네갈"],["🇮🇶","이라크"]]], opts:[
+  {g:"I조", excl:true, final:{ok:false, banner:'세네갈 5-0 이라크 승 → 승점 3·득실 +2로 한국보다 우위'}, fx:[[["🇸🇳","세네갈"],["🇮🇶","이라크"]]], opts:[
     '세네갈-이라크전 <span class="hl">무승부</span>로 끝날 경우',
     '<span class="hl">세네갈</span>이 이라크를 1골 차로 꺾을 경우',
     '<span class="hl">이라크</span>가 세네갈을 1~4골 차로 꺾을 경우']},
@@ -424,8 +424,8 @@ const SCENARIOS = [
     '<span class="hl">오스트리아</span>가 알제리를 꺾을 경우',
     '<span class="hl">알제리</span>가 오스트리아를 2골 차 이상으로 꺾을 경우']},
   {g:"K조", fx:[[["🇨🇩","DR콩고"],["🇺🇿","우즈베키스탄"]]], opts:[
-    '<span class="hl">우즈베키스탄</span>이 DR콩고와 비기거나 <span class="hl">5골 차 이하</span>로 이기는 경우<span class="sub">(6골 차 이상 대승 시 우즈벡이 한국 추월)</span>']},
-  {g:"L조", final:{ok:false, banner:'크로아티아 2-1 가나 승 → 가나 승점 4로 한국 추월'}, fx:[[["🇬🇭","가나"],["🇭🇷","크로아티아"]]], opts:[
+    '<span class="hl">우즈베키스탄</span>이 DR콩고와 비기거나 <span class="hl">5골 차 이하</span>로 이기는 경우<span class="sub">(6골 차 이상 대승 시 우즈벡이 한국보다 우위)</span>']},
+  {g:"L조", final:{ok:false, banner:'크로아티아 2-1 가나 승 → 가나 승점 4로 한국보다 우위'}, fx:[[["🇬🇭","가나"],["🇭🇷","크로아티아"]]], opts:[
     '<span class="hl">가나</span>가 크로아티아를 꺾을 경우']},
 ];
 const NEED = 3;
