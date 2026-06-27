@@ -343,7 +343,7 @@
           <span class="stat">승점 <b>3</b></span>
           <span class="stat">골득실 <b>−1</b></span>
           <span class="stat">다득점 <b>2</b></span>
-          <span class="stat note">각 조 3위 12팀 중 <b>상위 8위</b> 와일드카드 진출 · D·E·F·H·I조 종료, 남은 4개 조 최종전 미정</span>
+          <span class="stat note">각 조 3위 12팀 중 <b>상위 8위</b> 와일드카드 진출 · D·E·F·G·H·I조 종료, 남은 3개 조 최종전 미정</span>
         </div>
       </div>
       <div class="verdict" id="verdict">
@@ -373,8 +373,8 @@
   </section>
 
   <div class="cosmos">
-    <div class="cosmos-main">🌌 우주가, 아주 잠깐, 그를 돌아봤다</div>
-    <div class="cosmos-sub">9개의 문 중 4개가 닫혔지만, 드디어 <b>첫 문이 열렸다</b>.<br>이제 <b>2개</b>만 더 열리면 된다. 아직, 아직은.</div>
+    <div class="cosmos-main">🌌 우주는 잠깐 돌아봤다가, 다시 고개를 돌렸다</div>
+    <div class="cosmos-sub">9개의 문 중 <b>5개</b>가 닫혔고, <b>1개</b>가 열렸다.<br>남은 <b>3개</b> 중 <b>2개</b>는 반드시 열려야 한다. 벼랑 끝.</div>
   </div>
 
   <div class="picket-wrap">
@@ -396,7 +396,7 @@
   <div class="grid" id="grid"></div>
 
   <footer>
-    한국은 현재 승점 3·골득실 −1. D·E·F·H·I조는 종료됐고 <b>나머지 4개 조의 3차전(최종전)이 남아</b> 있으며, 그 결과에 따라 각 조 3위 순위가 갈립니다. 한국에 유리한 결과가 많을수록 32강(와일드카드) 가능성이 올라갑니다. 카드를 눌러 결과를 켜고 끄며 시뮬레이션해 보세요.<br>
+    한국은 현재 승점 3·골득실 −1. D·E·F·G·H·I조는 종료됐고 <b>나머지 3개 조의 3차전(최종전)이 남아</b> 있으며, 그 결과에 따라 각 조 3위 순위가 갈립니다. 한국에 유리한 결과가 많을수록 32강(와일드카드) 가능성이 올라갑니다. 카드를 눌러 결과를 켜고 끄며 시뮬레이션해 보세요.<br>
     <a class="src-link" href="https://m.sports.naver.com/fifaworldcup2026/record?seasonCode=3F9X" target="_blank" rel="noopener">📊 현재 순위표 보기 (네이버) →</a><br>
     <span class="src">* 공유 인포그래픽 기반 · 실제 대진/순위 규정과 다를 수 있는 참고용 시나리오 · 경기 시간은 한국시간(KST)</span><br>
     <span class="copyright">© 2026 Woncheol Heo. All rights reserved.</span>
@@ -412,7 +412,7 @@ const SCENARIOS = [
     '에콰도르가 독일을 <span class="hl">꺾지 못하고</span>, 퀴라소도 코트디부아르를 <span class="hl">꺾지 못할</span> 경우<span class="sub">(단, 퀴라소가 승리한다면 2골 차 이상이어야 함)</span>']},
   {g:"F조", final:{ok:false, banner:'스웨덴이 일본과 비겨 승점 4 → 한국보다 우위'}, fx:[[["🇯🇵","일본"],["🇸🇪","스웨덴"]]], opts:[
     '<span class="hl">일본</span>이 스웨덴을 2골 차 이상으로 꺾을 경우']},
-  {g:"G조", fx:[[["🇪🇬","이집트"],["🇮🇷","이란"]]], opts:[
+  {g:"G조", final:{ok:false, banner:'이란 2-1 이집트 승 → 이집트 격파 실패, 한국 추월'}, fx:[[["🇪🇬","이집트"],["🇮🇷","이란"]]], opts:[
     '<span class="hl">이집트</span>가 이란을 꺾을 경우']},
   {g:"H조", final:{ok:true, banner:'스페인 1-0 우루과이 승 → 조건 충족!'}, fx:[[["🇪🇸","스페인"],["🇺🇾","우루과이"]]], opts:[
     '<span class="hl">스페인</span>이 우루과이를 꺾을 경우']},
