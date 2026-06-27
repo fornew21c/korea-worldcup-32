@@ -449,7 +449,8 @@ const fixtureHTML = (a,b)=>`
     </div>`;
 const cardMet = i => state[i].some(Boolean);
 const LOCKED = SCENARIOS.map(s=>!!s.final);
-const LIVE = SCENARIOS.filter(s=>!(s.final && !s.final.ok)).length;  // 불충족 확정 제외(분모)
+const LIVE = SCENARIOS.filter(s=>!(s.final && !s.final.ok)).length;  // 남은(미실패) 조건 수 — 현황용
+const TOTAL = SCENARIOS.length;   // 게이지 분모는 처음 9개 고정
 const metCountOf = ()=> SCENARIOS.filter((s,i)=> s.final ? s.final.ok : cardMet(i)).length;
 SCENARIOS.forEach((s,i)=>{
   const card = document.createElement('div');
@@ -512,12 +513,12 @@ SCENARIOS.forEach((s,i)=>{
 
 // ticks + 진출선 위치(분모 = 남은 라이브 조건 수)
 const ticksEl = document.getElementById('ticks');
-for(let i=0;i<LIVE;i++){ const t=document.createElement('div'); t.className='tick'; ticksEl.appendChild(t); }
+for(let i=0;i<TOTAL;i++){ const t=document.createElement('div'); t.className='tick'; ticksEl.appendChild(t); }
 {
-  const pct = (NEED/LIVE*100)+'%';
+  const pct = (NEED/TOTAL*100)+'%';
   const th=document.querySelector('.thresh'), thl=document.querySelector('.thresh-label');
   if(th) th.style.left=pct; if(thl) thl.style.left=pct;
-  const lt=document.getElementById('liveTot'); if(lt) lt.textContent=LIVE;
+  const lt=document.getElementById('liveTot'); if(lt) lt.textContent=TOTAL;
   const tallyEl=document.getElementById('tally');
   if(tallyEl){
     const total=SCENARIOS.length;
@@ -607,7 +608,7 @@ function update(force){
   if(SHOW_RANKS) renderRanks();
   const met = metCountOf();
   metCount.textContent = met;
-  fill.style.width = (met/LIVE*100)+'%';
+  fill.style.width = (met/TOTAL*100)+'%';
   const isIn = met>=NEED;
 
   if(isIn){
