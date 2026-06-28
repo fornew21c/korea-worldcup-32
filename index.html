@@ -344,7 +344,7 @@
           <span class="stat">승점 <b>3</b></span>
           <span class="stat">골득실 <b>−1</b></span>
           <span class="stat">다득점 <b>2</b></span>
-          <span class="stat note">각 조 3위 12팀 중 <b>상위 8위</b> 와일드카드 진출 · D·E·F·G·H·I·K·L조 종료, 남은 1개 조 최종전 미정</span>
+          <span class="stat note">각 조 3위 12팀 중 <b>상위 8위</b> 와일드카드 진출 · D~L 9개 조 전부 종료 (충족 1 · 불충족 8)</span>
         </div>
       </div>
       <div class="verdict" id="verdict">
@@ -375,7 +375,7 @@
 
   <div class="cosmos">
     <div class="cosmos-main">🌌 온 우주의 기운이 그를 경질하고자 한다</div>
-    <div class="cosmos-sub">9개의 문 중 <b>7개</b>가 닫히고, <b>1개</b>만 열렸다.<br>마지막 문이 열려도 2개 — <b>3개에는 닿지 못한다.</b> 우주가 뜻을 이뤘다.</div>
+    <div class="cosmos-sub">9개의 문 중 <b>8개</b>가 닫히고, 단 <b>1개</b>만 열렸다.<br>우주가, 끝내, 뜻을 이뤘다.</div>
     <div class="banish">홍명보, 다시는 한국축구로 오지마라.</div>
   </div>
 
@@ -398,7 +398,7 @@
   <div class="grid" id="grid"></div>
 
   <footer>
-    한국은 현재 승점 3·골득실 −1. D·E·F·G·H·I·K·L조는 종료됐고 <b>나머지 1개 조(J)의 3차전(최종전)이 남아</b> 있으나, 충족 가능한 최대치가 진출선에 미치지 못합니다. 한국에 유리한 결과가 많을수록 32강(와일드카드) 가능성이 올라갑니다. 카드를 눌러 결과를 켜고 끄며 시뮬레이션해 보세요.<br>
+    한국은 승점 3·골득실 −1로 마쳤습니다. D~L <b>9개 조가 전부 종료</b>됐고, 유리한 결과는 단 <b>1개(H)</b>만 나와 진출선(3개)에 닿지 못했습니다. 한국에 유리한 결과가 많을수록 32강(와일드카드) 가능성이 올라갑니다. 카드를 눌러 결과를 켜고 끄며 시뮬레이션해 보세요.<br>
     <a class="src-link" href="https://m.sports.naver.com/fifaworldcup2026/record?seasonCode=3F9X" target="_blank" rel="noopener">📊 현재 순위표 보기 (네이버) →</a><br>
     <span class="src">* 공유 인포그래픽 기반 · 실제 대진/순위 규정과 다를 수 있는 참고용 시나리오 · 경기 시간은 한국시간(KST)</span><br>
     <span class="copyright">© 2026 Woncheol Heo. All rights reserved.</span>
@@ -422,7 +422,7 @@ const SCENARIOS = [
     '세네갈-이라크전 <span class="hl">무승부</span>로 끝날 경우',
     '<span class="hl">세네갈</span>이 이라크를 1골 차로 꺾을 경우',
     '<span class="hl">이라크</span>가 세네갈을 1~4골 차로 꺾을 경우']},
-  {g:"J조", excl:true, fx:[[["🇩🇿","알제리"],["🇦🇹","오스트리아"]]], opts:[
+  {g:"J조", excl:true, final:{ok:false, banner:'오스트리아 3-3 알제리 무승부 → 둘 다 승점 4로 한국보다 우위'}, fx:[[["🇩🇿","알제리"],["🇦🇹","오스트리아"]]], opts:[
     '<span class="hl">오스트리아</span>가 알제리를 꺾을 경우',
     '<span class="hl">알제리</span>가 오스트리아를 2골 차 이상으로 꺾을 경우']},
   {g:"K조", final:{ok:false, banner:'DR콩고 3-1 우즈벡 승 → 콩고 승점 4로 한국보다 우위'}, fx:[[["🇨🇩","DR콩고"],["🇺🇿","우즈베키스탄"]]], opts:[
