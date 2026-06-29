@@ -137,6 +137,17 @@
   .slot.lose{opacity:.4;text-decoration:line-through;text-decoration-color:rgba(224,48,58,.6)}
   .match.decided{border-color:rgba(35,193,107,.4)}
   .slot:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+  /* 확정 결과(잠금) */
+  .match.locked{border-color:rgba(126,135,155,.45)}
+  .slot.locked-slot{cursor:default}
+  .slot.locked-slot:not(.win):hover{background:none}
+  .slot.locked-slot.win::after{content:none}
+  .slot .goals{font-family:var(--mono);font-weight:800;font-size:14px;flex:none;color:var(--slate);font-variant-numeric:tabular-nums}
+  .slot.win .goals{color:var(--green)}
+  .mstatus{
+    font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--slate);
+    text-align:center;padding:5px 8px;border-top:1px solid var(--line);background:#0a1020;
+  }
 
   /* champion card */
   .champ-card{
@@ -261,6 +272,22 @@ const TOTAL = ROUND_SIZES.reduce((a,b)=>a+b,0); // 31
 /* picks[r][m] = 승자 팀 인덱스 또는 null */
 const picks = ROUND_SIZES.map(n=>Array(n).fill(null));
 
+/* 이미 치러진 경기(확정 결과) — 키 'r_m', goals=[홈,원정], win=승자 팀 인덱스, date 표기.
+   2026-06-29 기준 32강 중 확정된 경기만 잠금. 나머지는 사용자가 예측. */
+const LOCKED = {
+  '0_0': {goals:[0,1], win:1, date:'6/28'},   // 남아공 0-1 캐나다
+};
+const lockKey=(r,m)=>r+'_'+m;
+const lockedOf=(r,m)=>LOCKED[lockKey(r,m)]||null;
+function applyLocks(){
+  for(let r=0;r<ROUND_SIZES.length;r++){
+    for(let m=0;m<ROUND_SIZES[r];m++){
+      const L=lockedOf(r,m);
+      if(L) picks[r][m]=L.win;
+    }
+  }
+}
+
 /* (라운드 r, 경기 m, 사이드 side)의 참가 팀 인덱스 (없으면 null) */
 function participant(r,m,side){
   if(r===0) return R32[m][side];
@@ -290,13 +317,19 @@ function build(){
     col.appendChild(title);
     slotEls[r]=[];
     for(let m=0;m<ROUND_SIZES[r];m++){
-      const mt=document.createElement('div'); mt.className='match';
+      const L=lockedOf(r,m);
+      const mt=document.createElement('div'); mt.className='match'+(L?' locked':'');
       const pair=[];
       for(let side=0;side<2;side++){
         const btn=document.createElement('button');
         btn.type='button'; btn.className='slot';
         btn.addEventListener('click',()=>pick(r,m,side));
         mt.appendChild(btn); pair.push(btn);
+      }
+      if(L){
+        const cap=document.createElement('div');
+        cap.className='mstatus'; cap.textContent='🔒 경기 종료 · '+L.date;
+        mt.appendChild(cap);
       }
       slotEls[r][m]=pair;
       col.appendChild(mt);
@@ -317,6 +350,7 @@ function build(){
 }
 
 function pick(r,m,side){
+  if(lockedOf(r,m)) return;            // 확정 결과는 변경 불가
   const t=participant(r,m,side);
   if(t===null) return;                 // 빈 슬롯은 선택 불가
   picks[r][m] = (picks[r][m]===t) ? null : t;  // 같은 팀 다시 누르면 해제
@@ -336,6 +370,7 @@ function render(){
     for(let m=0;m<ROUND_SIZES[r];m++){
       const win=picks[r][m];
       const decided = win!==null;
+      const L=lockedOf(r,m);
       slotEls[r][m][0].closest('.match').classList.toggle('decided',decided);
       for(let side=0;side<2;side++){
         const t=participant(r,m,side);
@@ -345,8 +380,9 @@ function render(){
           el.innerHTML=`<span class="flag">🏳️</span><span class="nm">미정</span>`;
         }else{
           const isWin = win===t, isLose = decided && !isWin;
-          el.className='slot'+(isWin?' win':'')+(isLose?' lose':'');
-          el.innerHTML=`<span class="flag">${TEAMS[t].f}</span><span class="nm">${TEAMS[t].n}</span>`;
+          el.className='slot'+(isWin?' win':'')+(isLose?' lose':'')+(L?' locked-slot':'');
+          const goals = L ? `<span class="goals">${L.goals[side]}</span>` : '';
+          el.innerHTML=`<span class="flag">${TEAMS[t].f}</span><span class="nm">${TEAMS[t].n}</span>${goals}`;
         }
       }
     }
@@ -379,12 +415,14 @@ function render(){
 }
 
 document.getElementById('resetBtn').addEventListener('click',()=>{
-  picks.forEach(a=>a.fill(null)); wasCrowned=false; render();
+  picks.forEach(a=>a.fill(null)); applyLocks(); wasCrowned=false; render();
 });
 document.getElementById('randomBtn').addEventListener('click',()=>{
   picks.forEach(a=>a.fill(null));
   for(let r=0;r<ROUND_SIZES.length;r++){
     for(let m=0;m<ROUND_SIZES[r];m++){
+      const L=lockedOf(r,m);
+      if(L){ picks[r][m]=L.win; continue; }   // 확정 결과는 고정
       const a=participant(r,m,0), b=participant(r,m,1);
       picks[r][m] = Math.random()<0.5 ? a : b;
     }
@@ -418,7 +456,7 @@ function loop(){
 }
 
 document.getElementById('total').textContent=TOTAL;
-build(); render();
+build(); applyLocks(); render();
 </script>
 </body>
 </html>
